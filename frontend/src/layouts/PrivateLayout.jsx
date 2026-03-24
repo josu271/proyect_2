@@ -4,15 +4,20 @@ import Sidebar from "../components/admin/Sidebar";
 
 const PrivateLayout = () => {
   return (
-    <div className="flex">
-      <Sidebar />
+    <div className="flex min-h-screen bg-gray-100">
 
-      <div className="w-full">
+
+
+      <div className="flex-1">
         <Navbar />
-        <main className="p-5">
-          <Outlet />
+
+        <main className="p-6">
+          <div className="bg-white rounded-2xl shadow-md p-6">
+            <Outlet />
+          </div>
         </main>
       </div>
+
     </div>
   );
 };
