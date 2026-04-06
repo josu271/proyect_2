@@ -163,6 +163,11 @@ Se utiliza un enfoque ágil basado en:
 
 ---
 
+## 🧠 Enlace del Jira
+- https://continental-team-dr2widmb.atlassian.net/jira/software/c/projects/SGDHA/boards/3/backlog?atlOrigin=eyJpIjoiMjJhNzVhYmMyZGI2NGNhNzkwODM3MmJhNWQzYWI0YTkiLCJwIjoiaiJ9&epics=visible
+
+---
+
 ## 📌 Estado del Proyecto
 
 🚧 En desarrollo (MVP en progreso)
