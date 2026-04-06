@@ -1,208 +1,190 @@
-# 🌿 Sistema Web Inteligente para Turismo en Chanchamayo
+# 📚 Sistema de Generación Óptima de Horarios Académicos
 
-## 📌 Descripción del Proyecto
+## 🧠 Descripción del Proyecto
 
-Este proyecto consiste en el desarrollo de un sistema web inteligente orientado a optimizar la gestión y promoción de servicios turísticos en la zona de Chanchamayo.
+Este proyecto consiste en el desarrollo de una aplicación web inteligente capaz de generar horarios académicos óptimos en universidades con currículo flexible.
 
-La plataforma permite a los usuarios explorar paquetes turísticos, recibir recomendaciones personalizadas, realizar reservas y simular pagos en línea. Además, incorpora un chatbot automatizado que mejora la atención al cliente y un panel administrativo para la gestión eficiente del negocio.
+El problema aborda la complejidad en la planificación de horarios, considerando múltiples variables y restricciones como:
 
----
+- Disponibilidad de docentes
+- Prerrequisitos de cursos
+- Límite de créditos por estudiante
+- Capacidad de aulas
+- No solapamiento de horarios
 
-## 🎯 Objetivos
-
-### Objetivo General
-
-Desarrollar un sistema web inteligente que mejore la experiencia del turista y optimice la toma de decisiones en una empresa de turismo.
-
-### Objetivos Específicos
-
-* Permitir la gestión de paquetes turísticos.
-* Ofrecer recomendaciones personalizadas a los usuarios.
-* Implementar un sistema de reservas en línea.
-* Integrar un chatbot para atención automatizada.
-* Facilitar el análisis de demanda turística.
+Se trata de un problema de **alta complejidad (NP-hard)**, modelado como un **Problema de Satisfacción de Restricciones (CSP)**.
 
 ---
 
-## 🧩 Alcance del Sistema
+## 🎯 Objetivo
 
-El sistema incluye:
+Diseñar e implementar un sistema que permita:
 
-* Registro e inicio de sesión de usuarios.
-* Exploración de paquetes turísticos.
-* Recomendación de rutas según preferencias.
-* Reserva de paquetes turísticos.
-* Simulación de pagos.
-* Chatbot automatizado para atención al cliente.
-* Panel administrativo para gestión de servicios.
-* Visualización de destinos en mapas.
+- Generar horarios académicos válidos automáticamente
+- Reducir conflictos en la planificación
+- Optimizar el uso de recursos (docentes, aulas)
+- Mejorar la experiencia de estudiantes y coordinadores
+
+---
+
+## 🚀 Funcionalidades Principales
+
+### 🔹 Gestión Académica
+- Registro de estudiantes, docentes, cursos y aulas
+- Gestión de datos mediante CRUD
+
+### 🔹 Matrícula Inteligente
+- Validación automática de prerrequisitos
+- Control de límite de créditos (20–22)
+
+### 🔹 Generación de Horarios
+- Algoritmo basado en CSP
+- Asignación automática sin conflictos
+
+### 🔹 Visualización
+- Vista semanal de horarios
+- Visualización por estudiante, docente y aula
+
+### 🔹 Seguridad
+- Autenticación con JWT
+- Control de acceso por roles
 
 ---
 
 ## 🏗️ Arquitectura del Sistema
 
-El sistema sigue una arquitectura basada en:
+El sistema sigue una arquitectura moderna basada en:
 
-* Frontend desacoplado
-* Backend con API REST
-* Base de datos relacional
-* Automatización mediante workflows
+- **Frontend (SPA):** React + Vite  
+- **Backend (API REST):** FastAPI (Python)  
+- **Base de datos:** PostgreSQL  
+- **Autenticación:** JWT  
 
-### Estructura general:
-
-Frontend → Backend → Automatización (chatbot) → Base de datos
+### 🔄 Comunicación
+- Cliente ↔ API mediante HTTP (REST)
+- API ↔ Motor CSP (servicio interno en Python)
 
 ---
 
 ## ⚙️ Tecnologías Utilizadas
 
-### 🖥️ Frontend
-
-* React + Vite
-* Tailwind CSS
-* Axios
-* React Router
-
-### ⚙️ Backend
-
-* FastAPI (Python) o Node.js + Express
-* API REST
-* Autenticación con JWT
-
-### 🤖 Chatbot y Automatización
-
-* n8n (workflow automation)
-* Lógica basada en reglas
-
-### 🗄️ Base de Datos
-
-* PostgreSQL
-
-### 🗺️ Mapas
-
-* Leaflet + OpenStreetMap
-
-### 💳 Pagos
-
-* Simulación de pagos (sin integración real)
+| Capa        | Tecnología        |
+|------------|------------------|
+| Frontend   | React + Vite     |
+| Estilos    | Tailwind CSS     |
+| Backend    | FastAPI          |
+| Base de datos | PostgreSQL   |
+| Autenticación | JWT           |
+| Control de versiones | Git + Git Flow |
 
 ---
 
-## 🧠 Funcionalidades Inteligentes
+## 🧩 Modelado del Problema
 
-### 🔹 Sistema de Recomendación
+El sistema se basa en un modelo de **CSP (Constraint Satisfaction Problem)**:
 
-El sistema sugiere rutas turísticas en base a:
+### Variables:
+- Cursos
+- Docentes
+- Estudiantes
+- Aulas
+- Horarios
 
-* Presupuesto del usuario
-* Intereses (naturaleza, aventura, cultura)
-* Disponibilidad de paquetes
+### Restricciones:
+- No solapamiento de horarios
+- Prerrequisitos académicos
+- Límite de créditos
+- Disponibilidad de recursos
 
-### 🔹 Predicción de Demanda (Básica)
-
-Permite analizar tendencias de reservas para:
-
-* Optimizar promociones
-* Mejorar la planificación de servicios
-
-### 🔹 Chatbot Automatizado
-
-Implementado con n8n, permite:
-
-* Responder preguntas frecuentes
-* Recomendar paquetes
-* Brindar soporte básico al usuario
+### Enfoque:
+- Backtracking + heurísticas (MRV, forward checking)
+- Optimización combinatoria
 
 ---
 
-## 👥 Tipos de Usuario
+## 📊 Requisitos No Funcionales
 
-### 👤 Cliente
+El sistema cumple con estándares de calidad:
 
-* Registro e inicio de sesión
-* Exploración de paquetes
-* Reservas
-* Interacción con chatbot
+- ⚡ Rendimiento: generación < 30 segundos  
+- 🔒 Seguridad: OWASP Top 10  
+- ♿ Usabilidad: WCAG 2.1  
+- 📈 Escalabilidad: múltiples usuarios concurrentes  
+- 🧩 Mantenibilidad: código modular  
 
-### 🛠️ Administrador
+---
 
-* Gestión de paquetes turísticos
-* Control de precios
-* Visualización de demanda
-* Administración del sistema
+## 🔐 Estándares Aplicados
+
+- ISO/IEC 25010 (Calidad del software)
+- OWASP Top 10 (Seguridad)
+- WCAG 2.1 (Accesibilidad)
+- W3C (Desarrollo web)
+- Green Software (Eficiencia energética)
+
+---
+
 
 ---
 
 ## 🔄 Metodología de Desarrollo
 
-Se utilizó el modelo incremental, permitiendo el desarrollo del sistema por fases:
+Se utiliza un enfoque ágil basado en:
 
-1. Módulo de usuarios y autenticación
-2. Gestión de paquetes turísticos
-3. Sistema de reservas
-4. Chatbot y automatización
-5. Recomendaciones y mejoras
+- **Scrum** (Sprints de 2 semanas)
+- **Git Flow** (ramas feature, develop, main)
+- Desarrollo incremental
 
 ---
 
-## 🚀 Ventajas del Sistema
+## 🧪 Pruebas
 
-* Mejora la experiencia del usuario
-* Automatiza procesos de atención
-* Permite tomar decisiones basadas en datos
-* Reduce costos mediante herramientas open source
-* Escalable y modular
+- Pruebas unitarias (lógica del CSP)
+- Pruebas de integración (API)
+- Cobertura objetivo: ≥ 70%
 
 ---
 
-## ⚠️ Limitaciones
+## 🌱 Impacto del Proyecto
 
-* Sistema de pagos simulado (no real)
-* Recomendaciones basadas en reglas simples
-* Chatbot sin IA avanzada (modo gratuito)
+### Técnico
+- Automatización de un problema complejo
+- Uso de algoritmos de optimización
 
----
+### Social
+- Mejora en la experiencia académica
+- Reducción de conflictos de horarios
 
-## 📈 Posibles Mejoras Futuras
+### Económico
+- Reducción de tiempo y costos operativos
 
-* Integración de pagos reales (Stripe, PayPal)
-* Implementación de inteligencia artificial avanzada
-* Aplicación móvil
-* Integración con APIs de clima en tiempo real
-* Mejora del sistema de recomendación (Machine Learning)
-
----
-
-## 🧑‍💻 Instalación y Ejecución (Resumen)
-
-### Frontend
-
-```bash
-npm install
-npm run dev
-```
-
-### Backend
-
-```bash
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-### n8n
-
-```bash
-npx n8n
-```
+### Ambiental
+- Uso eficiente de recursos computacionales (Green Software)
 
 ---
 
-## 📄 Conclusión
+## 📌 Estado del Proyecto
 
-El sistema propuesto representa una solución moderna, escalable y eficiente para el sector turístico, integrando automatización, análisis de datos y una experiencia interactiva para el usuario, todo ello utilizando tecnologías accesibles y de bajo costo.
+🚧 En desarrollo (MVP en progreso)
 
 ---
 
-## 📚 Autor
+## 👥 Equipo de Desarrollo
 
-Proyecto desarrollado como parte del curso de Taller de Proyecto.
+- Backend Developer  
+- Frontend Developer  
+- QA / Documentación  
+- Especialista en datos  
+
+---
+
+## 📄 Licencia
+
+Este proyecto es desarrollado con fines académicos.
+
+---
+
+## 📬 Contacto
+
+Para más información, revisar la carpeta `/docs` o contactar al equipo de desarrollo.
+sullacorbetta@gmail.com
