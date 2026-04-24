@@ -3,8 +3,8 @@ import logo from "../../assets/logo.png";
 function Header({ title = "Sistema de Horarios" }) {
   return (
     <header className="header">
-      
-      <div className="header-left">
+
+      <div className="header-center">
         <img src={logo} alt="JOSU University" className="logo" />
         <div className="header-text">
           <h1>{title}</h1>
@@ -13,7 +13,7 @@ function Header({ title = "Sistema de Horarios" }) {
       </div>
 
       <div className="header-right">
-        <span>Usuario</span>
+        <span>Salir</span>
       </div>
 
     </header>
