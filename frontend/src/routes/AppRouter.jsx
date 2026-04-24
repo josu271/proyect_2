@@ -1,38 +1,58 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+
 import Login from "../pages/auth/Login";
+import RecuperacionContra from "../pages/auth/ForgotPassword";
+
 import StudentLayout from "../layouts/StudentLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import TeacherLayout from "../layouts/TeacherLayout";
-import DashboardStudent from "../pages/student/DashboardStudent";
-import StudentCourses from "../pages/student/MisCursos";
+
 import DashboardAdmin from "../pages/admin/DashboardAdmin";
+import CursosAdmin from "../pages/admin/Cursosadmin";
+import DocentesAdmin from "../pages/admin/Docentesadmin";
+import EstudiantesAdmin from "../pages/admin/Estudiantesadmin";
+import Reportes from "../pages/admin/Reportes";
+
+import DashboardStudent from "../pages/student/DashboardStudent";
+import HistorialEstudiante from "../pages/student/HistorialEstudiante";
+import MatriculasEstudiante from "../pages/student/Matriculasestudiante";
+import MiHorarioEstudiante from "../pages/student/MiHorariosestudiante";
+import MisCursosEstudiante from "../pages/student/MisCursosEstudiante";
+
 import DashboardTeacher from "../pages/teacher/DashboardTeacher";
-import RecuperacionContra from "../pages/auth/ForgotPassword";
+import DisponibilidadTeacher from "../pages/teacher/DisponibilidadTeacher";
+import MiHorarioTeacher from "../pages/teacher/MihorarioTeacher";
+import MisCursosTeacher from "../pages/teacher/MisCursosTeacher";
 
 function AppRouter() {
   return (
     <Routes>
-      {/* Ruta pública */}
       <Route path="/" element={<Login />} />
       <Route path="/forgot-password" element={<RecuperacionContra />} />
 
-      {/* Alumno */}
-      <Route path="/student" element={<StudentLayout />}>
-        <Route index element={<DashboardStudent />} />
-        <Route path="courses" element={<StudentCourses />} />
-      </Route>
-
-      {/* Admin */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<DashboardAdmin />} />
+        <Route path="cursos" element={<CursosAdmin />} />
+        <Route path="docentes" element={<DocentesAdmin />} />
+        <Route path="estudiantes" element={<EstudiantesAdmin />} />
+        <Route path="reportes" element={<Reportes />} />
       </Route>
 
-      {/* Docente */}
+      <Route path="/student" element={<StudentLayout />}>
+        <Route index element={<DashboardStudent />} />
+        <Route path="historial" element={<HistorialEstudiante />} />
+        <Route path="matricula" element={<MatriculasEstudiante />} />
+        <Route path="mi-horario" element={<MiHorarioEstudiante />} />
+        <Route path="mis-cursos" element={<MisCursosEstudiante />} />
+      </Route>
+
       <Route path="/teacher" element={<TeacherLayout />}>
         <Route index element={<DashboardTeacher />} />
+        <Route path="disponibilidad" element={<DisponibilidadTeacher />} />
+        <Route path="mi-horario" element={<MiHorarioTeacher />} />
+        <Route path="mis-cursos" element={<MisCursosTeacher />} />
       </Route>
 
-      {/* Ruta no encontrada */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
