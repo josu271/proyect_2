@@ -7,12 +7,14 @@ import DashboardStudent from "../pages/student/DashboardStudent";
 import StudentCourses from "../pages/student/MisCursos";
 import DashboardAdmin from "../pages/admin/DashboardAdmin";
 import DashboardTeacher from "../pages/teacher/DashboardTeacher";
+import RecuperacionContra from "../pages/auth/ForgotPassword";
 
 function AppRouter() {
   return (
     <Routes>
       {/* Ruta pública */}
       <Route path="/" element={<Login />} />
+      <Route path="/forgot-password" element={<RecuperacionContra />} />
 
       {/* Alumno */}
       <Route path="/student" element={<StudentLayout />}>
