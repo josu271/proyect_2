@@ -1,7 +1,7 @@
 function MiHorariosestudiante() {
   return (
     <section>
-      <h2>Matriculasestudiante</h2>
+      <h2>MiHorariosestudiante</h2>
       <p>Vista temporal del layout del administrador.</p>
     </section>
   );

@@ -15,7 +15,7 @@ function AdminLayout() {
   }, [sidebarClosed]);
 
   return (
-    <div className="app-shell">
+    <div className="admin-layout app-shell">
       <Sidebar
         role="admin"
         closed={sidebarClosed}

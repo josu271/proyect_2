@@ -2,7 +2,7 @@ import logo from "../../assets/logo.png";
 
 function Header({ title = "Sistema de Horarios" }) {
   return (
-    <header className="header">
+    <header className="admin-layout header">
 
       <div className="header-center">
         <img src={logo} alt="JOSU University" className="logo" />
