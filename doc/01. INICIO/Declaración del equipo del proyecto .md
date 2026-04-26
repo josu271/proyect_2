@@ -4,13 +4,13 @@ Los integrantes del equipo nos comprometemos a cumplir con las normas aquí esta
 
 **Roles y Responsabilidades:**
 
-| Rol | Miembro del Equipo | Responsabilidades Clave |
-| ----- | ----- | ----- |
-| Líder Técnico / Arquitecto | Sulla Corbetta Jose Luis | Facilitar ceremonias Scrum (Daily, Planning, Review, Retro), Gestionar riesgos y eliminar impedimentos y Asegurar flujo Git Flow y Pull Requests. |
-| Desarrollador Backend | Sulla Corbetta Jose Luis | Implementación de API REST, autenticación JWT, lógica de negocio. |
-| Desarrollador Frontend | Reyes Mendoza Harol Jesus | Implementación de SPA React, UI/UX, consumo de API |
-| Especialista en Datos / Algoritmos | Vilcahuaman Gonzales Jordan Ricardo | Modelado de datos, diseño de esquema PostgreSQL, definición de estructura para CSP |
-| QA / Documentador | Rafael Carpio Fabrizio Alezander | Pruebas, documentación técnica (docs/), seguimiento de criterios de aceptación |
+| Nombre | Rol Scrum | Responsabilidades específicas |
+| :---- | :---- | :---- |
+| **Sulla Corbetta Jose Luis** | **Scrum Master** | **Facilitar ceremonias, gestionar riesgos, asegurar Git Flow** |
+| **Sulla Corbetta Jose Luis** | **Developer Backend** | **FastAPI, PostgreSQL, JWT, endpoints** |
+| **Reyes Mendoza Harol Jesus** | **Developer Frontend** | **React, Tailwind, Axios, Context API, React Router** |
+| **Vilcahuaman Gonzales Jordan Ricardo** | **Developer Motor CSP** | **Algoritmo python-constraint/ortools, integración con API** |
+| **Rafael Carpio Fabrizio Alexander** | **QA / Documentador** | **Pruebas, documentación técnica (docs/).** |
 
 **Firmas:**
 
