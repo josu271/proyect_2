@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.modules.auth.auth_routes import router as auth_router
 from app.modules.admin.estudiantes.estudiantes_routes import router as estudiantes_router
+from app.modules.admin.docentes.docentes_routes import router as docentes_router
 
 app = FastAPI()
 
@@ -16,6 +17,8 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(estudiantes_router, prefix="/admin/estudiantes", tags=["Admin - Estudiantes"])
+app.include_router( docentes_router,prefix="/admin/docentes",tags=["Admin - Docentes"]
+)
 
 
 @app.get("/")
