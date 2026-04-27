@@ -1,167 +1,167 @@
-function Cursosadmin() {
-  const cursos = [
-    {
-      codigo: "CS101",
-      nombre: "Programación I",
-      creditos: 4,
-      nivel: 1,
-      programa: "Ingeniería de Sistemas",
-      estado: "Activo",
-    },
-    {
-      codigo: "BD202",
-      nombre: "Base de Datos",
-      creditos: 4,
-      nivel: 2,
-      programa: "Ingeniería de Sistemas",
-      estado: "Activo",
-    },
-  ];
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { obtenerCursos } from "../../api/admin/cursosApi";
+
+function CursosAdmin() {
+  const navigate = useNavigate();
+
+  const [cursos, setCursos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let activo = true;
+
+    async function cargarCursos() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await obtenerCursos();
+
+        if (activo) {
+          setCursos(data);
+        }
+      } catch (err) {
+        if (activo) {
+          setError(err.message || "Error al cargar cursos");
+        }
+      } finally {
+        if (activo) {
+          setLoading(false);
+        }
+      }
+    }
+
+    cargarCursos();
+
+    return () => {
+      activo = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="rounded-2xl bg-white p-6 shadow-sm">
+        <p className="text-slate-600">Cargando cursos...</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="rounded-2xl bg-white p-6 shadow-sm">
+        <p className="font-semibold text-red-600">{error}</p>
+      </section>
+    );
+  }
 
   return (
-    <section className="space-y-8">
-      
-      {/* HEADER */}
-      <div className="flex items-center justify-between">
+    <section className="space-y-6">
+      <div className="flex items-center justify-between rounded-2xl bg-white p-6 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h2 className="text-2xl font-bold text-slate-900">
             Gestión de Cursos
-          </h1>
-          <p className="text-sm text-slate-500">
-            Administra los cursos del sistema académico
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Administra cursos, créditos, nivel académico y programa asociado.
           </p>
         </div>
 
-        <button className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-blue-700">
+        <button
+          type="button"
+          onClick={() => navigate("/admin/cursos/crear")}
+          className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+        >
           + Nuevo curso
         </button>
       </div>
 
-      {/* FILTROS */}
-      <div className="flex gap-3">
-        <input
-          type="text"
-          placeholder="Buscar curso..."
-          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm"
-        />
-
-        <select className="rounded-xl border border-slate-200 px-4 py-3 text-sm">
-          <option>Todos los programas</option>
-        </select>
-
-        <select className="rounded-xl border border-slate-200 px-4 py-3 text-sm">
-          <option>Estado</option>
-          <option>Activo</option>
-          <option>Inactivo</option>
-        </select>
-      </div>
-
-      {/* TABLA */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
+        <table className="w-full border-collapse text-left">
+          <thead className="bg-slate-100 text-sm text-slate-600">
             <tr>
-              <th className="px-4 py-3">Código</th>
-              <th className="px-4 py-3">Curso</th>
-              <th className="px-4 py-3">Créditos</th>
-              <th className="px-4 py-3">Nivel</th>
-              <th className="px-4 py-3">Programa</th>
-              <th className="px-4 py-3">Estado</th>
-              <th className="px-4 py-3 text-right">Acciones</th>
+              <th className="px-6 py-4 font-semibold">Código</th>
+              <th className="px-6 py-4 font-semibold">Nombre</th>
+              <th className="px-6 py-4 font-semibold">Créditos</th>
+              <th className="px-6 py-4 font-semibold">Nivel</th>
+              <th className="px-6 py-4 font-semibold">Programa</th>
+              <th className="px-6 py-4 font-semibold">Estado</th>
+              <th className="px-6 py-4 font-semibold">Acciones</th>
             </tr>
           </thead>
 
-          <tbody className="divide-y">
-            {cursos.map((curso) => (
-              <tr key={curso.codigo} className="hover:bg-slate-50">
-                <td className="px-4 py-3 font-semibold">
-                  {curso.codigo}
-                </td>
-
-                <td className="px-4 py-3">
-                  {curso.nombre}
-                </td>
-
-                <td className="px-4 py-3">
-                  {curso.creditos}
-                </td>
-
-                <td className="px-4 py-3">
-                  {curso.nivel}
-                </td>
-
-                <td className="px-4 py-3">
-                  {curso.programa}
-                </td>
-
-                <td className="px-4 py-3">
-                  <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                    {curso.estado}
-                  </span>
-                </td>
-
-                <td className="px-4 py-3 text-right space-x-2">
-                  <button className="rounded-lg bg-blue-50 px-3 py-1 text-xs text-blue-600">
-                    Editar
-                  </button>
-
-                  <button className="rounded-lg bg-red-50 px-3 py-1 text-xs text-red-600">
-                    Eliminar
-                  </button>
+          <tbody className="divide-y divide-slate-200 text-sm">
+            {cursos.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="px-6 py-8 text-center text-slate-500">
+                  No hay cursos registrados.
                 </td>
               </tr>
-            ))}
+            ) : (
+              cursos.map((curso) => (
+                <tr key={curso.id} className="hover:bg-slate-50">
+                  <td className="px-6 py-4 font-semibold text-slate-900">
+                    {curso.codigo}
+                  </td>
+
+                  <td className="px-6 py-4 text-slate-700">
+                    {curso.nombre}
+                  </td>
+
+                  <td className="px-6 py-4 text-slate-600">
+                    {curso.creditos}
+                  </td>
+
+                  <td className="px-6 py-4 text-slate-600">
+                    {curso.nivel}
+                  </td>
+
+                  <td className="px-6 py-4 text-slate-600">
+                    {curso.programa || "Sin programa"}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        curso.activo
+                          ? "bg-green-100 text-green-700"
+                          : "bg-slate-200 text-slate-600"
+                      }`}
+                    >
+                      {curso.activo ? "Activo" : "Inactivo"}
+                    </span>
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin/cursos/ver/${curso.id}`)}
+                        className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                      >
+                        Ver
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(`/admin/cursos/editar/${curso.id}`)
+                        }
+                        className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                      >
+                        Editar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
-
-      {/* FORMULARIO (SIMULADO) */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-bold">Registrar Curso</h2>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <input
-            type="text"
-            placeholder="Código"
-            className="rounded-xl border px-4 py-3"
-          />
-
-          <input
-            type="text"
-            placeholder="Nombre del curso"
-            className="rounded-xl border px-4 py-3"
-          />
-
-          <input
-            type="number"
-            placeholder="Créditos"
-            className="rounded-xl border px-4 py-3"
-          />
-
-          <input
-            type="number"
-            placeholder="Nivel"
-            className="rounded-xl border px-4 py-3"
-          />
-
-          <select className="rounded-xl border px-4 py-3">
-            <option>Programa</option>
-          </select>
-
-          <select className="rounded-xl border px-4 py-3">
-            <option>Estado</option>
-            <option>Activo</option>
-            <option>Inactivo</option>
-          </select>
-        </div>
-
-        <button className="mt-5 rounded-xl bg-blue-600 px-6 py-3 text-white font-semibold">
-          Guardar curso
-        </button>
-      </div>
-
     </section>
   );
 }
 
-export default Cursosadmin;
+export default CursosAdmin;
