@@ -1,304 +1,293 @@
-function Matriculasestudiante() {
-  const cursosDisponibles = [
-    {
-      codigo: "CS101",
-      nombre: "Programación I",
-      docente: "Luis Ramírez",
-      seccion: "A",
-      aula: "Aula 204",
-      horario: "Lunes 08:00 - 09:00",
-      creditos: 4,
-      cupos: 8,
-      estado: "Disponible",
-    },
-    {
-      codigo: "BD202",
-      nombre: "Base de Datos",
-      docente: "Ana Torres",
-      seccion: "B",
-      aula: "Lab 301",
-      horario: "Miércoles 10:00 - 11:00",
-      creditos: 4,
-      cupos: 5,
-      estado: "Disponible",
-    },
-    {
-      codigo: "AS303",
-      nombre: "Arquitectura de Software",
-      docente: "Carlos Medina",
-      seccion: "A",
-      aula: "Aula 105",
-      horario: "Viernes 15:00 - 16:00",
-      creditos: 3,
-      cupos: 0,
-      estado: "Sin cupos",
-    },
-  ];
+import { useEffect, useState } from "react";
+import {
+  obtenerCursosDisponiblesMatricula,
+  registrarMatricula,
+} from "../../api/student/matriculaApi";
 
-  const cursosSeleccionados = [
-    {
-      codigo: "CS101",
-      nombre: "Programación I",
-      creditos: 4,
-      horario: "Lunes 08:00 - 09:00",
-    },
-    {
-      codigo: "BD202",
-      nombre: "Base de Datos",
-      creditos: 4,
-      horario: "Miércoles 10:00 - 11:00",
-    },
-  ];
+const dias = {
+  1: "Lunes",
+  2: "Martes",
+  3: "Miércoles",
+  4: "Jueves",
+  5: "Viernes",
+};
+
+function Matriculasestudiante() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const estudianteId = usuario?.estudiante_id;
+
+  const [cursos, setCursos] = useState([]);
+  const [seleccionados, setSeleccionados] = useState([]);
+  const [mensaje, setMensaje] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const cargarCursos = async () => {
+      if (!estudianteId) {
+        setError("No se encontró el estudiante_id del usuario logueado.");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await obtenerCursosDisponiblesMatricula(estudianteId);
+        setCursos(Array.isArray(data) ? data : []);
+      } catch (error) {
+        setError(error.message || "Error al cargar cursos disponibles");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarCursos();
+  }, [estudianteId]);
+
+  const recargarCursos = async () => {
+    if (!estudianteId) return;
+
+    try {
+      const data = await obtenerCursosDisponiblesMatricula(estudianteId);
+      setCursos(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setError(error.message || "Error al recargar cursos");
+    }
+  };
+
+  const existeChoque = (cursoNuevo) => {
+    return seleccionados.some(
+      (curso) =>
+        Number(curso.dia_semana) === Number(cursoNuevo.dia_semana) &&
+        curso.hora_inicio === cursoNuevo.hora_inicio &&
+        curso.hora_fin === cursoNuevo.hora_fin
+    );
+  };
+
+  const seleccionarCurso = (curso) => {
+    setMensaje("");
+    setError("");
+
+    const yaExiste = seleccionados.some(
+      (item) => item.seccion_id === curso.seccion_id
+    );
+
+    if (yaExiste) {
+      setSeleccionados(
+        seleccionados.filter((item) => item.seccion_id !== curso.seccion_id)
+      );
+      return;
+    }
+
+    if (existeChoque(curso)) {
+      setError("Este curso cruza con otro horario seleccionado.");
+      return;
+    }
+
+    setSeleccionados([...seleccionados, curso]);
+  };
+
+  const totalCreditos = seleccionados.reduce(
+    (total, curso) => total + Number(curso.creditos),
+    0
+  );
+
+  const confirmarMatricula = async () => {
+    if (!estudianteId) {
+      setError("No se encontró el estudiante_id del usuario logueado.");
+      return;
+    }
+
+    if (seleccionados.length === 0) {
+      setError("Debes seleccionar al menos un curso.");
+      return;
+    }
+
+    try {
+      setMensaje("");
+      setError("");
+
+      const secciones = seleccionados.map((curso) => curso.seccion_id);
+      const res = await registrarMatricula(estudianteId, secciones);
+
+      setMensaje(res.mensaje || "Matrícula registrada correctamente.");
+      setSeleccionados([]);
+      await recargarCursos();
+    } catch (error) {
+      setError(error.message || "Error al registrar matrícula");
+    }
+  };
+
+  if (!estudianteId) {
+    return (
+      <section className="p-6">
+        <h1 className="text-2xl font-bold text-slate-900">
+          Matrícula de cursos
+        </h1>
+        <p className="mt-2 text-red-600">
+          No se encontró el estudiante_id del usuario logueado.
+        </p>
+      </section>
+    );
+  }
 
   return (
-    <section className="space-y-8">
-      <div className="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white shadow-xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-100">
-          Módulo estudiante
-        </p>
-
-        <h1 className="mt-3 text-3xl font-bold">Matrícula de cursos</h1>
-
-        <p className="mt-2 max-w-2xl text-blue-100">
-          Selecciona las secciones disponibles según los horarios generados por el sistema.
+    <section className="space-y-6">
+      <div className="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white shadow">
+        <h1 className="text-3xl font-bold">Matrícula de cursos</h1>
+        <p className="mt-2 text-blue-100">
+          Selecciona tus cursos disponibles y revisa tu horario antes de
+          confirmar.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-4">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold text-slate-500">
-            Créditos seleccionados
-          </p>
-          <h3 className="mt-2 text-3xl font-bold text-slate-900">8</h3>
+      {mensaje && (
+        <div className="rounded-xl bg-emerald-50 p-4 font-semibold text-emerald-700">
+          {mensaje}
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-xl bg-red-50 p-4 font-semibold text-red-700">
+          {error}
+        </div>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-2xl bg-white p-5 shadow">
+          <p className="text-sm text-slate-500">Cursos seleccionados</p>
+          <h3 className="text-3xl font-bold">{seleccionados.length}</h3>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold text-slate-500">
-            Límite permitido
-          </p>
-          <h3 className="mt-2 text-3xl font-bold text-slate-900">20 - 22</h3>
+        <div className="rounded-2xl bg-white p-5 shadow">
+          <p className="text-sm text-slate-500">Créditos seleccionados</p>
+          <h3 className="text-3xl font-bold">{totalCreditos}</h3>
         </div>
 
-        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-          <p className="text-sm font-semibold text-amber-700">
-            Estado de matrícula
-          </p>
-          <h3 className="mt-2 text-xl font-bold text-amber-700">
-            Incompleta
-          </h3>
-        </div>
-
-        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-          <p className="text-sm font-semibold text-emerald-700">
-            Conflictos detectados
-          </p>
-          <h3 className="mt-2 text-3xl font-bold text-emerald-700">0</h3>
+        <div className="rounded-2xl bg-white p-5 shadow">
+          <p className="text-sm text-slate-500">Cursos disponibles</p>
+          <h3 className="text-3xl font-bold">{cursos.length}</h3>
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">
-                Cursos disponibles
-              </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Elige cursos con cupos abiertos y sin cruce de horario.
-              </p>
-            </div>
+      <div className="rounded-3xl bg-white p-6 shadow">
+        <h2 className="mb-4 text-xl font-bold">Cursos disponibles</h2>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <input
-                type="text"
-                placeholder="Buscar curso..."
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              />
-
-              <select className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
-                <option>Semestre 2026-I</option>
-                <option>Semestre 2026-II</option>
-              </select>
-            </div>
-          </div>
-
+        {loading ? (
+          <p className="text-slate-500">Cargando cursos disponibles...</p>
+        ) : cursos.length === 0 ? (
+          <p className="text-slate-500">
+            No hay cursos disponibles para matrícula.
+          </p>
+        ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[950px] border-collapse">
+            <table className="w-full min-w-[900px]">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
-                  <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Código
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Curso
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Docente
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Sección
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Horario
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Cupos
-                  </th>
-                  <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Estado
-                  </th>
-                  <th className="px-4 py-4 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
-                    Acción
-                  </th>
+                <tr className="border-b bg-slate-50 text-left text-sm text-slate-500">
+                  <th className="p-3">Código</th>
+                  <th className="p-3">Curso</th>
+                  <th className="p-3">Docente</th>
+                  <th className="p-3">Horario</th>
+                  <th className="p-3">Aula</th>
+                  <th className="p-3">Créditos</th>
+                  <th className="p-3">Cupos</th>
+                  <th className="p-3 text-right">Acción</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-100">
-                {cursosDisponibles.map((curso) => (
-                  <tr key={curso.codigo} className="transition hover:bg-slate-50">
-                    <td className="px-4 py-4 text-sm font-bold text-slate-700">
-                      {curso.codigo}
-                    </td>
+              <tbody>
+                {cursos.map((curso) => {
+                  const activo = seleccionados.some(
+                    (item) => item.seccion_id === curso.seccion_id
+                  );
 
-                    <td className="px-4 py-4">
-                      <p className="text-sm font-bold text-slate-900">
-                        {curso.nombre}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {curso.creditos} créditos · {curso.aula}
-                      </p>
-                    </td>
-
-                    <td className="px-4 py-4 text-sm text-slate-600">
-                      {curso.docente}
-                    </td>
-
-                    <td className="px-4 py-4 text-sm font-semibold text-slate-600">
-                      {curso.seccion}
-                    </td>
-
-                    <td className="px-4 py-4 text-sm text-slate-500">
-                      {curso.horario}
-                    </td>
-
-                    <td className="px-4 py-4 text-sm font-bold text-slate-700">
-                      {curso.cupos}
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-bold ${
-                          curso.estado === "Disponible"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-rose-50 text-rose-700"
-                        }`}
-                      >
-                        {curso.estado}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-4 text-right">
-                      <button
-                        type="button"
-                        className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
-                          curso.estado === "Disponible"
-                            ? "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                            : "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400"
-                        }`}
-                      >
-                        {curso.estado === "Disponible"
-                          ? "Seleccionar"
-                          : "Bloqueado"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                  return (
+                    <tr
+                      key={curso.seccion_id}
+                      className="border-b hover:bg-slate-50"
+                    >
+                      <td className="p-3 font-bold">{curso.codigo}</td>
+                      <td className="p-3">{curso.curso}</td>
+                      <td className="p-3">{curso.docente}</td>
+                      <td className="p-3">
+                        {dias[curso.dia_semana]} {curso.hora_inicio} -{" "}
+                        {curso.hora_fin}
+                      </td>
+                      <td className="p-3">{curso.aula || "Sin aula"}</td>
+                      <td className="p-3">{curso.creditos}</td>
+                      <td className="p-3">
+                        {curso.capacidad - curso.matriculados_actuales}
+                      </td>
+                      <td className="p-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => seleccionarCurso(curso)}
+                          className={`rounded-xl px-4 py-2 text-sm font-bold ${
+                            activo
+                              ? "bg-red-100 text-red-700"
+                              : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                          }`}
+                        >
+                          {activo ? "Quitar" : "Seleccionar"}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
+        )}
+      </div>
+
+      <div className="rounded-3xl bg-white p-6 shadow">
+        <h2 className="mb-4 text-xl font-bold">Vista previa del horario</h2>
+
+        <div className="grid gap-3 md:grid-cols-5">
+          {[1, 2, 3, 4, 5].map((dia) => (
+            <div key={dia} className="rounded-2xl border bg-slate-50 p-3">
+              <h3 className="mb-3 text-center font-bold text-slate-700">
+                {dias[dia]}
+              </h3>
+
+              <div className="space-y-2">
+                {seleccionados.filter(
+                  (curso) => Number(curso.dia_semana) === Number(dia)
+                ).length === 0 ? (
+                  <p className="text-center text-sm text-slate-400">Libre</p>
+                ) : (
+                  seleccionados
+                    .filter((curso) => Number(curso.dia_semana) === Number(dia))
+                    .map((curso) => (
+                      <div
+                        key={curso.seccion_id}
+                        className="rounded-xl bg-blue-600 p-3 text-white shadow"
+                      >
+                        <p className="text-sm font-bold">{curso.curso}</p>
+                        <p className="text-xs">
+                          {curso.hora_inicio} - {curso.hora_fin}
+                        </p>
+                        <p className="text-xs">{curso.docente}</p>
+                        <p className="text-xs">{curso.aula || "Sin aula"}</p>
+                      </div>
+                    ))
+                )}
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <aside className="space-y-6">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900">
-              Cursos seleccionados
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Revisa tu selección antes de confirmar matrícula.
-            </p>
-
-            <div className="mt-5 space-y-4">
-              {cursosSeleccionados.map((curso) => (
-                <div
-                  key={curso.codigo}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-bold uppercase text-blue-600">
-                        {curso.codigo}
-                      </p>
-                      <h3 className="mt-1 text-sm font-bold text-slate-900">
-                        {curso.nombre}
-                      </h3>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="rounded-lg bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600"
-                    >
-                      Quitar
-                    </button>
-                  </div>
-
-                  <p className="mt-3 text-xs text-slate-500">
-                    {curso.horario}
-                  </p>
-
-                  <p className="mt-1 text-xs font-semibold text-slate-700">
-                    {curso.creditos} créditos
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6">
-            <h2 className="text-lg font-bold text-blue-900">
-              Validación
-            </h2>
-
-            <div className="mt-5 space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-blue-700">Prerrequisitos</span>
-                <strong className="text-emerald-600">Cumple</strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-blue-700">Cruce de horario</span>
-                <strong className="text-emerald-600">Sin cruce</strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-blue-700">Créditos mínimos</span>
-                <strong className="text-amber-600">Pendiente</strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-blue-700">Cupos</span>
-                <strong className="text-emerald-600">Disponible</strong>
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="w-full rounded-2xl bg-blue-600 px-5 py-4 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700"
-          >
-            Confirmar matrícula
-          </button>
-        </aside>
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={confirmarMatricula}
+          disabled={seleccionados.length === 0}
+          className="rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+        >
+          Confirmar matrícula
+        </button>
       </div>
     </section>
   );

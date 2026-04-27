@@ -8,6 +8,7 @@ from app.modules.admin.cursos.cursos_routes import router as cursos_router
 from app.modules.teacher.disponibilidad.disponibilidad_routes import router as disponibilidad_router
 from app.modules.teacher.cursos.cursos_routes import router as teacher_cursos_router
 from app.modules.teacher.horario.horario_routes import router as teacher_horario_router
+from app.modules.student.matricula.matricula_routes import router as matricula_student_router
 
 
 app = FastAPI()
@@ -27,7 +28,7 @@ app.include_router(cursos_router,prefix="/admin/cursos",tags=["Admin - Cursos"])
 app.include_router(disponibilidad_router, prefix="/teacher/disponibilidad", tags=["Teacher - Disponibilidad"])
 app.include_router(teacher_cursos_router, prefix="/teacher/cursos", tags=["Teacher - Cursos"])
 app.include_router(teacher_horario_router, prefix="/teacher/horario", tags=["Teacher - Horario"])
-
+app.include_router(matricula_student_router, prefix="/student/matricula", tags=["Matrícula Estudiante"])
 @app.get("/")
 def inicio():
     return {"mensaje": "Backend funcionando"}
