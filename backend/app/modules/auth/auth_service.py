@@ -21,17 +21,53 @@ def login_usuario(correo: str, contrasena: str):
 
     usuario = cursor.fetchone()
 
-    cursor.close()
-    conn.close()
-
     if not usuario:
+        cursor.close()
+        conn.close()
         raise HTTPException(
             status_code=401,
             detail="Correo o contraseña incorrectos"
         )
 
+    usuario_id = usuario[0]
+    rol = usuario[2]
+
+    docente_id = None
+    estudiante_id = None
+
+    if rol == "DOCENTE":
+        cursor.execute("""
+            SELECT id
+            FROM docentes
+            WHERE usuario_id = %s
+            LIMIT 1;
+        """, (usuario_id,))
+
+        docente = cursor.fetchone()
+
+        if docente:
+            docente_id = docente[0]
+
+    if rol == "ESTUDIANTE":
+        cursor.execute("""
+            SELECT id
+            FROM estudiantes
+            WHERE usuario_id = %s
+            LIMIT 1;
+        """, (usuario_id,))
+
+        estudiante = cursor.fetchone()
+
+        if estudiante:
+            estudiante_id = estudiante[0]
+
+    cursor.close()
+    conn.close()
+
     return {
-        "id": str(usuario[0]),
+        "id": str(usuario_id),
         "correo": usuario[1],
-        "rol": usuario[2]
+        "rol": rol,
+        "docente_id": docente_id,
+        "estudiante_id": estudiante_id
     }

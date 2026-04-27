@@ -1,178 +1,251 @@
-function DisponibilidadTeacher() {
-  const cursos = [
-    "Programación I",
-    "Base de Datos",
-    "Arquitectura de Software",
-  ];
+import { useEffect, useState } from "react";
+import {
+  obtenerDisponibilidadPorDocente,
+  obtenerCursosDocente,
+  obtenerSemestres,
+  crearDisponibilidad,
+  eliminarDisponibilidad,
+} from "../../api/teacher/disponibilidadApi";
 
-  const horarios = [
-    "07:00", "08:00", "09:00", "10:00", "11:00",
-    "12:00", "14:00", "15:00", "16:00", "17:00",
-  ];
+const dias = [
+  { id: 1, nombre: "Lunes" },
+  { id: 2, nombre: "Martes" },
+  { id: 3, nombre: "Miércoles" },
+  { id: 4, nombre: "Jueves" },
+  { id: 5, nombre: "Viernes" },
+];
 
-  const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+const horas = [
+  "07:00",
+  "08:30",
+  "10:00",
+  "11:30",
+  "13:00",
+  "14:30",
+  "16:00",
+  "17:30",
+  "19:00",
+];
+
+function sumar90Minutos(hora) {
+  const [h, m] = hora.split(":").map(Number);
+  const fecha = new Date();
+  fecha.setHours(h);
+  fecha.setMinutes(m + 90);
+  return fecha.toTimeString().slice(0, 5);
+}
+
+function Disponibilidad() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const docenteId = usuario?.docente_id;
+
+  const [disponibilidades, setDisponibilidades] = useState([]);
+  const [cursos, setCursos] = useState([]);
+  const [semestres, setSemestres] = useState([]);
+
+  const [cursoId, setCursoId] = useState("");
+  const [semestreId, setSemestreId] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function cargarDatos() {
+      if (!docenteId) return;
+
+      try {
+        setLoading(true);
+
+        const [dispData, cursosData, semestresData] = await Promise.all([
+          obtenerDisponibilidadPorDocente(docenteId),
+          obtenerCursosDocente(docenteId),
+          obtenerSemestres(),
+        ]);
+
+        setDisponibilidades(dispData);
+        setCursos(cursosData);
+        setSemestres(semestresData);
+      } catch (error) {
+        alert(error.message || "Error al cargar datos");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    cargarDatos();
+  }, [docenteId]);
+
+  const recargarDisponibilidad = async () => {
+    const data = await obtenerDisponibilidadPorDocente(docenteId);
+    setDisponibilidades(data);
+  };
+
+  const existeDisponibilidad = (dia, hora) => {
+    return disponibilidades.find(
+      (item) =>
+        Number(item.dia_semana) === Number(dia) &&
+        item.hora_inicio.slice(0, 5) === hora &&
+        Number(item.curso_id) === Number(cursoId) &&
+        Number(item.semestre_id) === Number(semestreId)
+    );
+  };
+
+  const seleccionarHorario = async (dia, hora) => {
+    if (!cursoId || !semestreId) {
+      alert("Selecciona un curso y un semestre");
+      return;
+    }
+
+    const existente = existeDisponibilidad(dia, hora);
+
+    try {
+      if (existente) {
+        await eliminarDisponibilidad(existente.id);
+      } else {
+        await crearDisponibilidad({
+          docente_id: Number(docenteId),
+          curso_id: Number(cursoId),
+          semestre_id: Number(semestreId),
+          dia_semana: Number(dia),
+          hora_inicio: hora,
+          hora_fin: sumar90Minutos(hora),
+          turno: hora < "13:00" ? "MANANA" : "TARDE",
+          disponible: true,
+        });
+      }
+
+      await recargarDisponibilidad();
+    } catch (error) {
+      alert(error.message || "Error al guardar disponibilidad");
+    }
+  };
+
+  if (!docenteId) {
+    return (
+      <section className="p-6">
+        <h1 className="text-2xl font-bold text-slate-900">
+          Disponibilidad docente
+        </h1>
+        <p className="mt-2 text-red-600">
+          No se encontró el docente_id del usuario logueado.
+        </p>
+      </section>
+    );
+  }
 
   return (
-    <section className="space-y-8">
-      <div className="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white shadow-xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-100">
-          Módulo docente
-        </p>
-
-        <h1 className="mt-3 text-3xl font-bold">Mi disponibilidad</h1>
-
-        <p className="mt-2 max-w-2xl text-blue-100">
-          Selecciona un curso asignado y marca los días y bloques horarios en los que puedes dictarlo.
+    <section className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">
+          Mi disponibilidad
+        </h1>
+        <p className="mt-1 text-slate-600">
+          Selecciona los bloques horarios disponibles.
         </p>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900">
-          Datos de disponibilidad
-        </h2>
+      <div className="mb-6 grid grid-cols-1 gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-2">
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">
+            Curso
+          </label>
+          <select
+            value={cursoId}
+            onChange={(e) => setCursoId(e.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-blue-600"
+          >
+            <option value="">Seleccione un curso</option>
+            {cursos.map((curso) => (
+              <option key={curso.id} value={curso.id}>
+                {curso.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-600">
-              Curso asignado
-            </label>
-
-            <select className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
-              <option>Seleccionar curso</option>
-              {cursos.map((curso) => (
-                <option key={curso}>{curso}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-600">
-              Semestre
-            </label>
-
-            <select className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
-              <option>Semestre 2026-I</option>
-              <option>Semestre 2026-II</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-600">
-              Tipo de clase
-            </label>
-
-            <select className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
-              <option>Teórico</option>
-              <option>Práctico</option>
-              <option>Teórico y práctico</option>
-            </select>
-          </div>
+        <div>
+          <label className="mb-1 block text-sm font-semibold text-slate-700">
+            Semestre
+          </label>
+          <select
+            value={semestreId}
+            onChange={(e) => setSemestreId(e.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-4 py-2 outline-none focus:border-blue-600"
+          >
+            <option value="">Seleccione un semestre</option>
+            {semestres.map((semestre) => (
+              <option key={semestre.id} value={semestre.id}>
+                {semestre.codigo}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-slate-900">
-              Bloques disponibles
-            </h2>
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <table className="min-w-[900px] w-full border-collapse text-sm">
+          <thead>
+            <tr className="bg-slate-100 text-slate-700">
+              <th className="border border-slate-200 p-3 text-left">
+                Hora
+              </th>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Marca los horarios en los que puedes dictar el curso seleccionado.
-            </p>
-          </div>
+              {dias.map((dia) => (
+                <th
+                  key={dia.id}
+                  className="border border-slate-200 p-3 text-center"
+                >
+                  {dia.nombre}
+                </th>
+              ))}
+            </tr>
+          </thead>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] border-separate border-spacing-2">
-              <thead>
-                <tr>
-                  <th className="rounded-2xl bg-slate-100 px-4 py-3 text-left text-sm font-bold text-slate-600">
-                    Hora
-                  </th>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="border border-slate-200 p-6 text-center text-slate-500"
+                >
+                  Cargando disponibilidad...
+                </td>
+              </tr>
+            ) : (
+              horas.map((hora) => (
+                <tr key={hora}>
+                  <td className="border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-700">
+                    {hora} - {sumar90Minutos(hora)}
+                  </td>
 
-                  {dias.map((dia) => (
-                    <th
-                      key={dia}
-                      className="rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-bold text-slate-600"
-                    >
-                      {dia}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+                  {dias.map((dia) => {
+                    const activo = existeDisponibilidad(dia.id, hora);
 
-              <tbody>
-                {horarios.map((hora) => (
-                  <tr key={hora}>
-                    <td className="rounded-2xl bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
-                      {hora}
-                    </td>
-
-                    {dias.map((dia, index) => (
-                      <td key={`${dia}-${hora}`} className="text-center">
+                    return (
+                      <td
+                        key={`${dia.id}-${hora}`}
+                        className="border border-slate-200 p-2 text-center"
+                      >
                         <button
                           type="button"
-                          className={`h-12 w-full rounded-2xl border text-sm font-semibold transition ${
-                            index % 2 === 0
-                              ? "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                              : "border-slate-200 bg-white text-slate-400 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+                          onClick={() => seleccionarHorario(dia.id, hora)}
+                          className={`w-full rounded-lg px-3 py-3 text-sm font-semibold transition ${
+                            activo
+                              ? "bg-green-600 text-white hover:bg-green-700"
+                              : "bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-700"
                           }`}
                         >
-                          {index % 2 === 0 ? "Disponible" : "Libre"}
+                          {activo ? "Disponible" : "Seleccionar"}
                         </button>
                       </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <aside className="space-y-6">
-          <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6">
-            <h3 className="text-lg font-bold text-blue-900">
-              Resumen
-            </h3>
-
-            <div className="mt-5 space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-blue-700">Curso</span>
-                <strong className="text-blue-950">Programación I</strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-blue-700">Turno</span>
-                <strong className="text-blue-950">Mañana</strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-blue-700">Días seleccionados</span>
-                <strong className="text-blue-950">5</strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-blue-700">Bloques disponibles</span>
-                <strong className="text-blue-950">25</strong>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-blue-700">Estado</span>
-                <strong className="text-emerald-600">Pendiente</strong>
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="w-full rounded-2xl bg-blue-600 px-5 py-4 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700"
-          >
-            Guardar disponibilidad
-          </button>
-        </aside>
+                    );
+                  })}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </section>
   );
 }
 
-export default DisponibilidadTeacher;
+export default Disponibilidad;

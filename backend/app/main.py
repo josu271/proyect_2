@@ -5,6 +5,7 @@ from app.modules.auth.auth_routes import router as auth_router
 from app.modules.admin.estudiantes.estudiantes_routes import router as estudiantes_router
 from app.modules.admin.docentes.docentes_routes import router as docentes_router
 from app.modules.admin.cursos.cursos_routes import router as cursos_router
+from app.modules.teacher.disponibilidad.disponibilidad_routes import router as disponibilidad_router
 
 
 app = FastAPI()
@@ -19,8 +20,9 @@ app.add_middleware(
 
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(estudiantes_router, prefix="/admin/estudiantes", tags=["Admin - Estudiantes"])
-app.include_router( docentes_router,prefix="/admin/docentes",tags=["Admin - Docentes"])
-app.include_router(    cursos_router,prefix="/admin/cursos",tags=["Admin - Cursos"])
+app.include_router(docentes_router,prefix="/admin/docentes",tags=["Admin - Docentes"])
+app.include_router(cursos_router,prefix="/admin/cursos",tags=["Admin - Cursos"])
+app.include_router(disponibilidad_router, prefix="/teacher/disponibilidad", tags=["Teacher - Disponibilidad"])
 
 @app.get("/")
 def inicio():
