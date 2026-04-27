@@ -7,6 +7,7 @@ from app.modules.admin.docentes.docentes_routes import router as docentes_router
 from app.modules.admin.cursos.cursos_routes import router as cursos_router
 from app.modules.teacher.disponibilidad.disponibilidad_routes import router as disponibilidad_router
 from app.modules.teacher.cursos.cursos_routes import router as teacher_cursos_router
+from app.modules.teacher.horario.horario_routes import router as teacher_horario_router
 
 
 app = FastAPI()
@@ -25,6 +26,7 @@ app.include_router(docentes_router,prefix="/admin/docentes",tags=["Admin - Docen
 app.include_router(cursos_router,prefix="/admin/cursos",tags=["Admin - Cursos"])
 app.include_router(disponibilidad_router, prefix="/teacher/disponibilidad", tags=["Teacher - Disponibilidad"])
 app.include_router(teacher_cursos_router, prefix="/teacher/cursos", tags=["Teacher - Cursos"])
+app.include_router(teacher_horario_router, prefix="/teacher/horario", tags=["Teacher - Horario"])
 
 @app.get("/")
 def inicio():

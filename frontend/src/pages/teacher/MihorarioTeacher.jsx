@@ -1,203 +1,183 @@
-function MihorarioTeacher() {
-  const horarios = [
-    "07:00", "08:00", "09:00", "10:00", "11:00",
-    "12:00", "14:00", "15:00", "16:00", "17:00",
-  ];
+import { useEffect, useState } from "react";
+import { obtenerHorarioDocente } from "../../api/teacher/horarioApi";
 
-  const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+const dias = [
+  { id: 1, nombre: "Lunes" },
+  { id: 2, nombre: "Martes" },
+  { id: 3, nombre: "Miércoles" },
+  { id: 4, nombre: "Jueves" },
+  { id: 5, nombre: "Viernes" },
+];
 
-  const clases = {
-    "Lunes-08:00": {
-      curso: "Programación I",
-      aula: "Aula 204",
-      seccion: "A",
-      tipo: "Teórico",
-    },
-    "Miércoles-10:00": {
-      curso: "Base de Datos",
-      aula: "Lab 301",
-      seccion: "B",
-      tipo: "Práctico",
-    },
-    "Viernes-15:00": {
-      curso: "Arquitectura de Software",
-      aula: "Aula 105",
-      seccion: "A",
-      tipo: "Teórico",
-    },
+const horas = [
+  "07:00",
+  "07:45",
+  "08:30",
+  "09:15",
+  "10:00",
+  "10:45",
+  "11:30",
+  "12:15",
+  "13:00",
+  "13:45",
+  "14:30",
+  "15:15",
+  "16:00",
+  "16:45",
+  "17:30",
+  "18:15",
+  "19:00",
+  "19:45",
+  "20:30",
+];
+
+function MiHorarioTeacher() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const docenteId = usuario?.docente_id;
+
+  const [horario, setHorario] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function cargarHorario() {
+      if (!docenteId) return;
+
+      try {
+        setLoading(true);
+        const data = await obtenerHorarioDocente(docenteId);
+        setHorario(data);
+      } catch (error) {
+        alert(error.message || "Error al cargar horario");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    cargarHorario();
+  }, [docenteId]);
+
+  const buscarBloque = (dia, hora) => {
+    return horario.find(
+      (item) =>
+        Number(item.dia_semana) === Number(dia) &&
+        item.hora_inicio.slice(0, 5) === hora
+    );
   };
 
+  if (!docenteId) {
+    return (
+      <section className="p-6">
+        <h1 className="text-2xl font-bold text-slate-900">Mi horario</h1>
+        <p className="mt-2 text-red-600">
+          No se encontró el docente_id del usuario logueado.
+        </p>
+      </section>
+    );
+  }
+
   return (
-    <section className="space-y-8">
-      <div className="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white shadow-xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-100">
-          Módulo docente
-        </p>
-
-        <h1 className="mt-3 text-3xl font-bold">Mi horario</h1>
-
-        <p className="mt-2 max-w-2xl text-blue-100">
-          Consulta las clases asignadas por el sistema según tu disponibilidad registrada.
+    <section className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-900">Mi horario</h1>
+        <p className="mt-1 text-slate-600">
+          Vista semanal de los cursos asignados al docente.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-4">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold text-slate-500">Cursos asignados</p>
-          <h3 className="mt-2 text-3xl font-bold text-slate-900">3</h3>
-        </div>
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <table className="min-w-[1000px] w-full border-collapse text-sm">
+          <thead>
+            <tr className="bg-slate-100 text-slate-700">
+              <th className="w-32 border border-slate-200 p-3 text-left">
+                Hora
+              </th>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold text-slate-500">Horas semanales</p>
-          <h3 className="mt-2 text-3xl font-bold text-slate-900">12</h3>
-        </div>
-
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold text-slate-500">Aulas asignadas</p>
-          <h3 className="mt-2 text-3xl font-bold text-slate-900">3</h3>
-        </div>
-
-        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-          <p className="text-sm font-semibold text-emerald-700">Estado</p>
-          <h3 className="mt-2 text-xl font-bold text-emerald-700">
-            Sin conflictos
-          </h3>
-        </div>
-      </div>
-
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">
-              Horario semanal
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Vista semanal de tus cursos, aulas y secciones asignadas.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <select className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
-              <option>Semestre 2026-I</option>
-              <option>Semestre 2026-II</option>
-            </select>
-
-            <button
-              type="button"
-              className="rounded-2xl border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-700 transition hover:bg-blue-100"
-            >
-              Exportar horario
-            </button>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] border-separate border-spacing-2">
-            <thead>
-              <tr>
-                <th className="rounded-2xl bg-slate-100 px-4 py-3 text-left text-sm font-bold text-slate-600">
-                  Hora
+              {dias.map((dia) => (
+                <th
+                  key={dia.id}
+                  className="border border-slate-200 p-3 text-center"
+                >
+                  {dia.nombre}
                 </th>
+              ))}
+            </tr>
+          </thead>
 
-                {dias.map((dia) => (
-                  <th
-                    key={dia}
-                    className="rounded-2xl bg-slate-100 px-4 py-3 text-center text-sm font-bold text-slate-600"
-                  >
-                    {dia}
-                  </th>
-                ))}
+          <tbody>
+            {loading ? (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="border border-slate-200 p-6 text-center text-slate-500"
+                >
+                  Cargando horario...
+                </td>
               </tr>
-            </thead>
-
-            <tbody>
-              {horarios.map((hora) => (
+            ) : (
+              horas.map((hora) => (
                 <tr key={hora}>
-                  <td className="rounded-2xl bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700">
+                  <td className="border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-700">
                     {hora}
                   </td>
 
                   {dias.map((dia) => {
-                    const clase = clases[`${dia}-${hora}`];
+                    const bloque = buscarBloque(dia.id, hora);
 
                     return (
-                      <td key={`${dia}-${hora}`} className="align-top">
-                        {clase ? (
-                          <div className="min-h-28 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-left shadow-sm">
-                            <h3 className="text-sm font-bold text-blue-900">
-                              {clase.curso}
-                            </h3>
-
-                            <p className="mt-2 text-xs font-semibold text-blue-700">
-                              {clase.aula}
+                      <td
+                        key={`${dia.id}-${hora}`}
+                        className="h-28 border border-slate-200 p-2 align-top"
+                      >
+                        {bloque ? (
+                          <div className="h-full rounded-xl bg-blue-600 p-3 text-white shadow-sm">
+                            <p className="text-xs font-semibold opacity-90">
+                              {bloque.codigo_curso}
                             </p>
 
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-blue-700">
-                                Sección {clase.seccion}
-                              </span>
+                            <h3 className="mt-1 text-sm font-bold leading-tight">
+                              {bloque.curso}
+                            </h3>
 
-                              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-indigo-700">
-                                {clase.tipo}
-                              </span>
-                            </div>
+                            <p className="mt-2 text-xs">
+                              {bloque.hora_inicio.slice(0, 5)} -{" "}
+                              {bloque.hora_fin.slice(0, 5)}
+                            </p>
+
+                            <p className="text-xs">
+                              Aula: {bloque.aula || "Sin aula"}
+                            </p>
+
+                            <p className="text-xs">
+                              Sección {bloque.numero_seccion} ·{" "}
+                              {bloque.tipo_seccion}
+                            </p>
+
+                            <p className="mt-1 text-[11px] opacity-90">
+                              {bloque.semestre}
+                            </p>
                           </div>
                         ) : (
-                          <div className="flex min-h-28 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 text-xs font-medium text-slate-400">
-                            Sin clase
+                          <div className="flex h-full items-center justify-center rounded-xl bg-slate-50 text-xs text-slate-400">
+                            Libre
                           </div>
                         )}
                       </td>
                     );
                   })}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-900">
-          Detalle de clases asignadas
-        </h2>
-
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <h3 className="font-bold text-slate-900">Programación I</h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Lunes · 08:00 - 09:00
-            </p>
-            <p className="mt-1 text-sm text-slate-500">
-              Aula 204 · Sección A
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <h3 className="font-bold text-slate-900">Base de Datos</h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Miércoles · 10:00 - 11:00
-            </p>
-            <p className="mt-1 text-sm text-slate-500">
-              Lab 301 · Sección B
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <h3 className="font-bold text-slate-900">
-              Arquitectura de Software
-            </h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Viernes · 15:00 - 16:00
-            </p>
-            <p className="mt-1 text-sm text-slate-500">
-              Aula 105 · Sección A
-            </p>
-          </div>
-        </div>
-      </div>
+      {!loading && horario.length === 0 && (
+        <p className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+          No tienes horario publicado todavía.
+        </p>
+      )}
     </section>
   );
 }
 
-export default MihorarioTeacher;
+export default MiHorarioTeacher;
