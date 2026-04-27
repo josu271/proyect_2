@@ -1,7 +1,14 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function Sidebar({ role = "student", closed = false, onToggle }) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const cerrarSesion = () => {
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
+    navigate("/");
+  };
 
   const menuItems = {
     admin: [
@@ -31,7 +38,9 @@ function Sidebar({ role = "student", closed = false, onToggle }) {
   return (
     <aside className={`admin-layout sidebar ${closed ? "closed" : ""}`}>
       <div className="sidebar-toggle">
-        <button onClick={() => onToggle && onToggle()}>☰</button>
+        <button type="button" onClick={() => onToggle && onToggle()}>
+          ☰
+        </button>
       </div>
 
       <div className="sidebar-header">
@@ -51,10 +60,15 @@ function Sidebar({ role = "student", closed = false, onToggle }) {
           </Link>
         ))}
 
-        <Link to="/" title="Cerrar sesión">
+        <button
+          type="button"
+          onClick={cerrarSesion}
+          title="Cerrar sesión"
+          className="sidebar-logout"
+        >
           <span className="sidebar-icon">🚪</span>
           <span className="sidebar-label">Cerrar sesión</span>
-        </Link>
+        </button>
       </nav>
     </aside>
   );

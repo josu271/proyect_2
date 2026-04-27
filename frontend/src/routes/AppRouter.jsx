@@ -12,6 +12,9 @@ import CursosAdmin from "../pages/admin/Cursosadmin";
 import DocentesAdmin from "../pages/admin/Docentesadmin";
 import EstudiantesAdmin from "../pages/admin/Estudiantesadmin";
 import Reportes from "../pages/admin/Reportes";
+import VerEstudiante from "../pages/admin/VerEstudiante";
+import EditarEstudiante from "../pages/admin/EditarEstudiante";
+import CrearEstudiante from "../pages/admin/CrearEstudiante";
 
 import DashboardStudent from "../pages/student/DashboardStudent";
 import HistorialEstudiante from "../pages/student/HistorialEstudiante";
@@ -35,6 +38,9 @@ function AppRouter() {
         <Route path="cursos" element={<CursosAdmin />} />
         <Route path="docentes" element={<DocentesAdmin />} />
         <Route path="estudiantes" element={<EstudiantesAdmin />} />
+        <Route path="estudiantes/ver/:id" element={<VerEstudiante />} />
+        <Route path="estudiantes/editar/:id" element={<EditarEstudiante />} />
+        <Route path="estudiantes/crear" element={<CrearEstudiante />} />
         <Route path="reportes" element={<Reportes />} />
       </Route>
 
