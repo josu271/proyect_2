@@ -9,9 +9,19 @@ import TeacherLayout from "../layouts/TeacherLayout";
 
 import DashboardAdmin from "../pages/admin/DashboardAdmin";
 import CursosAdmin from "../pages/admin/Cursosadmin";
+import CrearCurso from "../pages/admin/CrearCurso";
+import EditarCurso from "../pages/admin/EditarCurso";
+import VerCurso from "../pages/admin/VerCurso.jsx";
+import AsignarDocenteCurso from "../pages/admin/AsignarDocenteCurso.jsx";
 import DocentesAdmin from "../pages/admin/Docentesadmin";
+import CrearDocente from "../pages/admin/CrearDocente";
+import VerDocente from "../pages/admin/VerDocente";
+import EditarDocente from "../pages/admin/EditarDocente";
 import EstudiantesAdmin from "../pages/admin/Estudiantesadmin";
 import Reportes from "../pages/admin/Reportes";
+import VerEstudiante from "../pages/admin/VerEstudiante";
+import EditarEstudiante from "../pages/admin/EditarEstudiante";
+import CrearEstudiante from "../pages/admin/CrearEstudiante";
 
 import DashboardStudent from "../pages/student/DashboardStudent";
 import HistorialEstudiante from "../pages/student/HistorialEstudiante";
@@ -33,8 +43,18 @@ function AppRouter() {
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<DashboardAdmin />} />
         <Route path="cursos" element={<CursosAdmin />} />
+        <Route path="cursos/crear" element={<CrearCurso />} />
+        <Route path="cursos/editar/:id" element={<EditarCurso />} />
+        <Route path="cursos/ver/:id" element={<VerCurso />} />
+        <Route path="cursos/asignar-docente/:id" element={<AsignarDocenteCurso />} />
         <Route path="docentes" element={<DocentesAdmin />} />
+        <Route path="docentes/crear" element={<CrearDocente />} />
+        <Route path="docentes/ver/:id" element={<VerDocente />} />
+        <Route path="docentes/editar/:id" element={<EditarDocente />} />
         <Route path="estudiantes" element={<EstudiantesAdmin />} />
+        <Route path="estudiantes/ver/:id" element={<VerEstudiante />} />
+        <Route path="estudiantes/editar/:id" element={<EditarEstudiante />} />
+        <Route path="estudiantes/crear" element={<CrearEstudiante />} />
         <Route path="reportes" element={<Reportes />} />
       </Route>
 

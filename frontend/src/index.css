@@ -206,3 +206,69 @@ a {
   font-size: 0.8rem;
   color: var(--muted);
 }
+
+.admin-layout .sidebar-nav a,
+.admin-layout .sidebar-nav .sidebar-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+
+  background: transparent;
+  border: none;
+  color: var(--text);
+
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.admin-layout .sidebar-nav .sidebar-logout:hover {
+  background: var(--sidebar-hover);
+}
+
+.admin-layout .sidebar-nav .sidebar-logout .sidebar-icon {
+  width: 22px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.admin-layout .sidebar.closed .sidebar-nav .sidebar-logout {
+  justify-content: center;
+  padding: 0.8rem 0.4rem;
+}
+
+.admin-layout .sidebar.closed .sidebar-nav .sidebar-logout .sidebar-label {
+  display: none;
+}
+
+/* FIX: botón salir del header */
+.admin-layout .header-right {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.admin-layout .logout-header {
+  border: none;
+  background: #f1f5f9;
+  color: var(--text);
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-layout .logout-header:hover {
+  background: #e2e8f0;
+}
