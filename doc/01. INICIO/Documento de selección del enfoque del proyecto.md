@@ -4,9 +4,8 @@
 
 Decisión: Scrum con Sprints de 4 semanas (4 Sprints en total, duración total 16 semanas).
 
-Justificación (metodológica y contextual):
+Justificación:
 
-* El problema tiene requisitos cambiantes (consigna PFA sección 1.a).  
 * La rúbrica evalúa trabajo colaborativo y ceremonias Scrum.  
 * Permite retroalimentación del docente (Product Owner) cada 2 semanas.  
 * El equipo está compuesto por 4 integrantes (tamaño adecuado para Scrum).  

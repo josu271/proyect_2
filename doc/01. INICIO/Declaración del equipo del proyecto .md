@@ -1,16 +1,15 @@
 # **Declaración del Equipo del Proyecto**
 
-Los integrantes del equipo nos comprometemos a cumplir con las normas aquí establecidas, mantener comunicación asertiva y trabajar colaborativamente para alcanzar los objetivos del proyecto."Sistema de Generación Óptima de Horarios Académicos".
+Los integrantes del equipo nos comprometemos a cumplir con las normas aquí establecidas, mantener comunicación asertiva y trabajar colaborativamente para alcanzar los objetivos del proyecto "Sistema de Generación Óptima de Horarios Académicos".
 
 **Roles y Responsabilidades:**
 
 | Nombre | Rol Scrum | Responsabilidades específicas |
-| :---- | :---- | :---- |
-| **Sulla Corbetta Jose Luis** | **Scrum Master** | **Facilitar ceremonias, gestionar riesgos, asegurar Git Flow** |
-| **Sulla Corbetta Jose Luis** | **Developer Backend** | **FastAPI, PostgreSQL, JWT, endpoints** |
-| **Reyes Mendoza Harol Jesus** | **Developer Frontend** | **React, Tailwind, Axios, Context API, React Router** |
-| **Vilcahuaman Gonzales Jordan Ricardo** | **Developer Motor CSP** | **Algoritmo python-constraint/ortools, integración con API** |
-| **Rafael Carpio Fabrizio Alexander** | **QA / Documentador** | **Pruebas, documentación técnica (docs/).** |
+| ----- | ----- | ----- |
+| **Sulla Corbetta Jose Luis** | Scrum Master \+ Backend | Facilitar ceremonias, gestionar riesgos, asegurar Git Flow, FastAPI, PostgreSQL, JWT |
+| **Reyes Mendoza Harol Jesus** | Developer Backend | React, Tailwind, Axios, Context API, React Router |
+| **Vilcahuaman Gonzales Jordan Ricardo** | Developer Frontend | Algoritmo OR-Tools, integración con API, modelo de optimización |
+| **Rafael Carpio Fabrizio Alexander** | QA / Documentador | Pruebas (pytest/vitest), documentación técnica (docs/), cobertura ≥70% |
 
 **Firmas:**
 

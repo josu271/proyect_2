@@ -4,10 +4,10 @@
 
 Las universidades con currículo flexible permiten a los estudiantes elegir cursos libremente dentro de un plan de estudios. Sin embargo, la planificación de horarios académicos en este contexto presenta dificultades significativas porque:
 
-* La matrícula estudiantil es altamente variable cada período.  
-* Existen múltiples restricciones interdependientes (prerrequisitos, créditos, disponibilidad, capacidad de aulas).  
-* Los métodos actuales (hojas de cálculo, planificación manual) no garantizan horarios sin conflictos.  
-* No existe una solución única ni trivial (problema NP-hard de optimización combinatoria).
+* La matrícula estudiantil es altamente variable cada período  
+* Existen múltiples restricciones interdependientes (prerrequisitos, créditos, disponibilidad, capacidad)  
+* Los métodos actuales no garantizan horarios sin conflictos  
+* Es un problema NP-hard de optimización combinatoria
 
 ## **2\. Stakeholders y sus molestias principales**
 
@@ -33,7 +33,7 @@ Las universidades con currículo flexible permiten a los estudiantes elegir curs
 
 ## **4\. Restricciones del problema**
 
-### **Restricciones Duras (Hard) – Deben cumplirse 100%**
+### **Restricciones Duras (Hard)**
 
 | ID | Restricción | Descripción | Afecta a |
 | ----- | ----- | ----- | ----- |
@@ -46,25 +46,25 @@ Las universidades con currículo flexible permiten a los estudiantes elegir curs
 | H-07 | Disponibilidad docente | El horario asignado a un curso debe estar dentro de la disponibilidad declarada por el docente (MAÑANA o TARDE) | Docente |
 | H-08 | Nota mínima aprobatoria | Un curso aprobado requiere calificación ≥ 11.00/20 para ser considerado como prerrequisito cumplido | Estudiante |
 
-### **Restricciones Blandas (Soft) – Opcionales, mejoran calidad**
+### **Restricciones Blandas (Soft)**
 
-| ID | Restricción | Descripción | Prioridad |
+| ID | Restricción | Descripción | Stakeholder |
 | ----- | ----- | ----- | ----- |
-| S-01 | Preferencia horaria docente | Priorizar franjas que el docente marcó como "preferidas" | Alta |
-| S-02 | Continuidad horaria | Evitar huecos largos entre cursos para un mismo estudiante | Media |
-| S-03 | Uso eficiente de aulas | Priorizar asignar cursos grandes a aulas grandes | Media |
-| S-04 | Distribución equitativa | Evitar que un mismo docente tenga todos sus cursos en horarios tempranos (7am) | Baja |
+| S-01 | Preferencia horaria docente | Priorizar franjas que el docente marcó como "preferidas" | Docente |
+| S-02 | Continuidad horaria | Evitar huecos largos entre cursos para un mismo estudiante | Estudiante |
+| S-03 | Uso eficiente de aulas | Priorizar asignar cursos grandes a aulas grandes | Coordinador |
+| S-04 | Distribución equitativa | Evitar que un mismo docente tenga todos sus cursos en horarios tempranos (7am) | Coordinador |
 
 ## **5\. Reporte de conflictos**
 
 | Tipo de conflicto | Severidad | Descripción |
 | ----- | ----- | ----- |
-| `CLASSROOM_OVERLAP` | HIGH | Dos cursos asignados a la misma aula en el mismo horario |
-| `TEACHER_OVERLAP` | HIGH | Un docente asignado a dos cursos en el mismo horario |
-| `STUDENT_OVERLAP` | HIGH | Un estudiante matriculado en dos cursos que se dictan en el mismo horario |
-| `CAPACITY_EXCEEDED` | MEDIUM | El número de estudiantes excede la capacidad del aula |
-| `TEACHER_UNAVAILABLE` | MEDIUM | Curso asignado fuera del bloque de disponibilidad del docente (MAÑANA/TARDE) |
-| `CLASSROOM_UNAVAILABLE` | LOW | Aula asignada fuera de su disponibilidad operativa |
+| CLASSROOM\_OVERLAP | HIGH | Dos cursos asignados a la misma aula en el mismo horario |
+| TEACHER\_OVERLAP | HIGH | Un docente asignado a dos cursos en el mismo horario |
+| STUDENT\_OVERLAP | HIGH | Un estudiante matriculado en dos cursos que se dictan en el mismo horario |
+| CAPACITY\_EXCEEDED | MEDIUM | El número de estudiantes excede la capacidad del aula |
+| TEACHER\_UNAVAILABLE | MEDIUM | Curso asignado fuera del bloque de disponibilidad del docente (MAÑANA/TARDE) |
+| CLASSROOM\_UNAVAILABLE | LOW | Aula asignada fuera de su disponibilidad operativa |
 
 ## **6\. Ambigüedades detectadas y decisiones tomadas** 
 
