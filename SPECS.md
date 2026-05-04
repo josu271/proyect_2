@@ -1,159 +1,221 @@
 # SPECS.md
 
-# Project Overview
+# Descripción del Proyecto
 
-Build an intelligent academic scheduling system for flexible curricula.
+Desarrollar un sistema inteligente de generación de horarios académicos para currículas flexibles utilizando técnicas de **Problemas de Satisfacción de Restricciones (CSP)**.
 
-Stack:
+## Tecnologías
 
-- PostgreSQL (database)
-- FastAPI (Python backend)
-- React (frontend)
-- OR-Tools (CSP solver)
+PostgreSQL (Base de datos)
+FastAPI (Backend en Python)
+React + Vite (Frontend)
+OR-Tools (Solver CSP)
 
-Core technology:
+##  Tecnología Central
 
-- Constraint Satisfaction Problem (CSP)
-- Backtracking + forward checking + MRV heuristic
-
----
-
-# Functional Requirements
-
-## Visitor (Unauthenticated)
-
-As a visitor I want:
-
-- Nothing (system requires authentication)
+Backtracking
+Forward Checking
+Heurística MRV (Minimum Remaining Values)
 
 ---
 
-## Student (Authenticated)
+# Objetivo del Sistema
 
-As a student I want:
-
-- Select courses to enroll
-- Validate prerequisites automatically (grade ≥ 11.00/20)
-- Validate credit limit (max 6 credits per semester)
-- View my generated schedule (weekly view)
-- Export my schedule to PDF
+Generar automáticamente horarios académicos válidos respetando reglas institucionales, disponibilidad de recursos y restricciones académicas.
 
 ---
 
-## Teacher (Authenticated)
+# Entradas del Sistema
 
-As a teacher I want:
-
-- Register my availability (MORNING/AFTERNOON)
-- View my assigned schedule
-- View assigned classrooms
-
----
-
-## Coordinator (Authenticated)
-
-As a coordinator I want:
-
-- Generate schedules automatically using CSP
-- Validate all hard constraints before publishing
-- View schedules by student, teacher, or classroom
-- Get detailed conflict reports
+Cursos seleccionados por el estudiante
+Historial académico (notas)
+Créditos de cada curso
+Disponibilidad de docentes (MAÑANA / TARDE)
+Disponibilidad de aulas
+Capacidad de aulas
+Reglas institucionales (límite de créditos, prerrequisitos)
+Parámetros del sistema
 
 ---
 
-## Admin (Authenticated)
+# Salidas del Sistema
 
-As an admin I want:
-
-- CRUD students, teachers, courses, classrooms
-- Manage users and roles
-- View audit logs
-
----
-
-# Features
-
-| Feature | Status |
-|---------|--------|
-| Authentication (JWT, 4 roles) | Required |
-| CRUD Estudiantes | Required |
-| CRUD Docentes | Required |
-| CRUD Cursos | Required |
-| CRUD Aulas | Required |
-| Validación de matrícula (prerrequisitos + créditos ≤6) | Required |
-| Generación de horarios con CSP (OR-Tools) | Required |
-| Vista semanal de horarios | Required |
-| Reporte de conflictos | Required |
-| Exportación a PDF | Desired |
-| Trazabilidad (auditoría) | Desired |
+Horario generado (estructura semanal: días vs horas)
+Estado de validación (válido / inválido)
+Reporte de conflictos:
+  - Solapamientos de horario
+  - Incumplimiento de prerrequisitos
+  - Conflictos de recursos
+Lista de cursos asignados
+Exportación a PDF (opcional)
 
 ---
 
-# API
+# Actores del Sistema
 
-Endpoints:
+## Visitante (No autenticado)
+Sin acceso al sistema
 
-POST /api/auth/login
+## Estudiante
+Seleccionar cursos
+Validar matrícula
+Visualizar horario
+Exportar horario
 
-POST /api/auth/register (admin only)
+## Docente
+Registrar disponibilidad
+Ver horario asignado
+Ver aulas asignadas
 
-GET /api/estudiantes
+## Coordinador
+Generar horarios mediante CSP
+Validar restricciones
+Ver reportes de conflictos
 
-POST /api/estudiantes
-
-PUT /api/estudiantes/{id}
-
-DELETE /api/estudiantes/{id}
-
-POST /api/estudiantes/{id}/matricula
-
-GET /api/estudiantes/{id}/horario
-
-GET /api/docentes
-
-POST /api/docentes
-
-PUT /api/docentes/{id}/disponibilidad
-
-GET /api/cursos
-
-POST /api/cursos
-
-PUT /api/cursos/{id}
-
-DELETE /api/cursos/{id}
-
-GET /api/aulas
-
-POST /api/aulas
-
-PUT /api/aulas/{id}
-
-DELETE /api/aulas/{id}
-
-POST /api/horarios/generar
-
-GET /api/horarios
-
-GET /api/horarios/conflictos
+## Administrador
+CRUD de estudiantes, docentes, cursos y aulas
+Gestión de usuarios y roles
+Visualización de auditoría
 
 ---
 
-# Non Functional Requirements
+# Reglas de Negocio
 
-- Schedule generation time < 50 seconds (30 courses, 20 teachers, 15 classrooms)
-- JWT Authentication with 8h expiration
-- Responsive UI (Tailwind CSS)
-- WCAG 2.1 AA accessibility (Lighthouse > 90)
-- OWASP Top 10 compliance
-- Test coverage ≥ 70%
-- Dockerized deployment (optional)
+Un estudiante debe cumplir los prerrequisitos para matricularse
+Nota mínima aprobatoria: **11/20**
+Máximo de créditos por semestre: **6 créditos**
+No puede haber solapamiento de horarios
+Un docente no puede dictar dos cursos al mismo tiempo
+Un aula no puede ser asignada a más de un curso simultáneamente
+Se debe respetar la disponibilidad del docente
+Se debe respetar la disponibilidad del aula
 
 ---
 
-# Database
+# Restricciones del Sistema (CSP)
 
-Tables:
+## Restricciones Duras
+
+No solapamiento de horarios
+Cumplimiento de prerrequisitos
+Límite de créditos respetado
+Disponibilidad docente respetada
+Capacidad del aula no excedida
+No duplicidad de recursos (docente/aula en el mismo horario)
+
+## Restricciones Blandas
+
+Minimizar espacios vacíos en el horario
+Respetar preferencias de turno
+Balancear carga académica
+Reducir tiempos muertos entre clases
+
+---
+
+# Casos Límite
+
+No existe solución válida → retornar error controlado
+Existen múltiples soluciones → seleccionar la mejor
+Datos incompletos → bloquear generación de horario
+Conflicto total → generar reporte detallado
+No hay docente disponible → marcar conflicto
+No hay aula disponible → marcar conflicto
+
+---
+
+# Requisitos Funcionales
+
+## Estudiante
+
+Seleccionar cursos
+Validar prerrequisitos automáticamente (nota ≥ 11)
+Validar límite de créditos (≤ 6)
+Visualizar horario generado
+Exportar horario a PDF
+
+## Docente
+
+Registrar disponibilidad
+Ver horario asignado
+Ver aulas asignadas
+
+## Coordinador
+
+Generar horarios (CSP)
+Validar restricciones
+Visualizar horarios
+Generar reportes de conflicto
+
+## Administrador
+
+CRUD de estudiantes
+CRUD de docentes
+CRUD de cursos
+CRUD de aulas
+Gestión de usuarios y roles
+Visualizar auditoría
+
+---
+
+# Funcionalidades
+
+| Funcionalidad | Estado |
+|--------------|--------|
+| Autenticación (JWT, 4 roles) | Requerido |
+| CRUD Estudiantes | Requerido |
+| CRUD Docentes | Requerido |
+| CRUD Cursos | Requerido |
+| CRUD Aulas | Requerido |
+| Validación de matrícula | Requerido |
+| Generación de horarios (CSP) | Requerido |
+| Vista semanal de horarios | Requerido |
+| Reporte de conflictos | Requerido |
+| Exportación a PDF | Deseado |
+| Auditoría | Deseado |
+
+---
+
+# API (Resumen)
+
+## Autenticación
+POST /api/auth/login  
+POST /api/auth/register  
+
+## Estudiantes
+GET /api/estudiantes  
+POST /api/estudiantes  
+PUT /api/estudiantes/{id}  
+DELETE /api/estudiantes/{id}  
+POST /api/estudiantes/{id}/matricula  
+GET /api/estudiantes/{id}/horario  
+
+## Docentes
+GET /api/docentes  
+POST /api/docentes  
+PUT /api/docentes/{id}/disponibilidad  
+
+## Cursos
+GET /api/cursos  
+POST /api/cursos  
+PUT /api/cursos/{id}  
+DELETE /api/cursos/{id}  
+
+## Aulas
+GET /api/aulas  
+POST /api/aulas  
+PUT /api/aulas/{id}  
+DELETE /api/aulas/{id}  
+
+## Horarios
+POST /api/horarios/generar  
+GET /api/horarios  
+GET /api/horarios/conflictos  
+
+---
+
+# Modelo de Datos (Alto Nivel)
+
+Tablas:
 
 estudiantes
 docentes
@@ -162,42 +224,66 @@ aulas
 horarios
 auditoria
 
----
+Relaciones:
 
-# UI Requirements
-
-Use:
-
-- Tailwind CSS
-
-Include:
-
-- Navbar with user role
-- Dashboard by role (admin, coordinator, teacher, student)
-- CRUD forms with validation
-- Weekly schedule view (table days vs hours)
-- PDF exporter
+estudiante → cursos
+docente → cursos
+curso → aula
+horario → estudiante / docente / aula
 
 ---
 
-# Acceptance Criteria
+# Requisitos de Interfaz (UI)
 
-The system is complete when:
-
-- All features pass tests
-- Authentication works (4 roles)
-- CRUD works for all entities
-- Schedule generation works in < 50 seconds
-- Test coverage ≥ 70%
-- Documentation complete (README with TOC, AGENTS.md, SPECS.md, CONSTITUTION.md)
+Diseño responsive (Tailwind CSS)
+Dashboard por rol
+Formularios con validación
+Vista semanal de horarios
+Visualización de conflictos
+Exportación a PDF
 
 ---
 
-# Future Enhancements
+# Requisitos No Funcionales
 
-- Multi-objective optimization (minimize gaps, maximize preferences)
-- Student availability (surveys)
-- Courses with multiple blocks (theory + lab)
-- Specialized classroom types
-- iCalendar export
-- Multiple campuses
+Generación de horario < **50 segundos**
+Soporte:
+  - 30 cursos
+  - 20 docentes
+  - 15 aulas
+Autenticación JWT (expiración 8h)
+Accesibilidad (WCAG 2.1 AA)
+Seguridad (OWASP Top 10)
+Cobertura de pruebas ≥ 70%
+Arquitectura modular
+
+---
+
+# Criterios de Aceptación
+
+El sistema se considera completo cuando:
+
+Todas las funcionalidades están implementadas
+El CSP genera horarios válidos
+No existen conflictos en resultados finales
+CRUD funciona correctamente
+Autenticación operativa
+Cobertura de pruebas ≥ 70%
+Documentación completa
+
+---
+
+# Mejoras Futuras
+
+Optimización multiobjetivo
+Preferencias de estudiantes
+Cursos con múltiples bloques
+Aulas especializadas
+Exportación iCalendar
+Soporte multi-campus
+
+---
+
+# Cumplimiento SDD
+
+Este documento define entradas, salidas, reglas de negocio, restricciones y casos límite, reduciendo ambigüedad y asegurando coherencia entre especificación, modelado e implementación.
