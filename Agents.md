@@ -10,7 +10,6 @@ Root structure:
 /frontend        # React + Vite
 /docs            # Documentation
 /tests           # Automated tests
-/docker          # Docker configurations (optional)
 
 Always include:
 
