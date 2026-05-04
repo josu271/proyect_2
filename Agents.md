@@ -1,157 +1,163 @@
 # AGENT.md
 
-## Project Structure
+## Estructura del Proyecto
 
-Always use a modular and maintainable project structure.
+Siempre utiliza una estructura de proyecto modular y mantenible.
 
-Root structure:
+**Estructura raíz:**
 
 /backend         # FastAPI (Python)
 /frontend        # React + Vite
 /docs            # Documentation
 /tests           # Automated tests
 
-Always include:
 
-- README.md
-- .gitignore
-- docker-compose.yml (optional)
-- .env.example
+**Siempre incluir:**
 
----
-
-## Development Strategy
-
-Use incremental development.
-
-Rules:
-
-- Implement one feature at a time.
-- Validate every feature before moving to the next.
-- Run tests before proceeding.
-- Never implement multiple major features simultaneously.
+- `README.md`
+- `.gitignore`
+- `docker-compose.yml` (opcional)
+- `.env.example`
 
 ---
 
-## Coding Standards
+## Estrategia de Desarrollo
+
+Utilizar desarrollo incremental.
+
+**Reglas:**
+
+- Implementar una funcionalidad a la vez.
+- Validar cada funcionalidad antes de pasar a la siguiente.
+- Ejecutar las pruebas antes de continuar.
+- Nunca implementar múltiples funcionalidades mayores al mismo tiempo.
+
+---
+
+## Estándares de Codificación
 
 ### Python (Backend - FastAPI)
 
-Use:
+**Usar:**
 
-- snake_case for variables and functions
-- PascalCase for classes and Pydantic models
-- Ruff or Black for formatting
-- Type hints (mandatory)
+- `snake_case` para variables y funciones
+- `PascalCase` para clases y modelos de Pydantic
+- Ruff o Black para formateo
+- Type hints (obligatorio)
 
-Follow:
+**Seguir:**
 
-- SOLID principles
+- Principios SOLID
 - Clean Code
-- RESTful API conventions
-- Service Layer pattern
-- Repository pattern where applicable
+- Convenciones RESTful API
+- Patrón Service Layer
+- Patrón Repository cuando sea aplicable
 
 ### JavaScript (Frontend - React)
 
-Use:
+**Usar:**
 
-- camelCase for variables
-- PascalCase for React components
+- `camelCase` para variables
+- `PascalCase` para componentes de React
 - ESLint
 - Prettier
 
-Follow:
+**Seguir:**
 
-- SOLID principles
+- Principios SOLID
 - Clean Code
 
 ---
 
-## Backend Standards
+## Estándares del Backend
 
-Use:
+Utilizar:
 
 - FastAPI
-- Pydantic for input validation
+- Pydantic para validación de entrada
 - SQLAlchemy ORM
-- Service Layer pattern
-- Repository pattern where applicable
+- Patrón Service Layer
+- Patrón Repository cuando sea aplicable
 
 ---
 
-## Frontend Standards
+## Estándares del Frontend
 
-Use:
+Utilizar:
 
-- Functional components
+- Componentes funcionales
 - React Hooks
-- Feature-based folder structure
-- Context API for state management
-- Axios for HTTP requests
+- Estructura de carpetas basada en funcionalidades (Feature-based)
+- Context API para manejo de estado
+- Axios para peticiones HTTP
 
-Avoid:
+**Evitar:**
 
 - Class components
-- Business logic inside UI components
+- Lógica de negocio dentro de componentes de UI
 
 ---
 
-## Tools to Use
+## Herramientas a Utilizar
 
-Always use:
+Siempre utilizar:
 
 - Git
 - Bash
 - npm (frontend) / pip (backend)
 
-Code Quality:
+**Calidad de Código:**
 
-- Ruff (Python) / ESLint (JS)
-- Black (Python) / Prettier (JS)
+- Ruff (Python) / ESLint (JavaScript)
+- Black (Python) / Prettier (JavaScript)
 
-Testing:
+**Pruebas:**
 
-- pytest + pytest-cov (backend)
-- Vitest + @vitest/coverage-v8 (frontend)
-
----
-
-## Boundaries
-
-Do NOT modify:
-
-- requirements.txt without reason
-- package-lock.json without reason
-- .env values
-- generated migrations unless required
-
-Never remove existing working code unless replacing it safely.
+- `pytest + pytest-cov` (backend)
+- `Vitest + @vitest/coverage-v8` (frontend)
 
 ---
 
-## Security
+## Límites (Boundaries)
 
-Follow:
+**NO modificar:**
+
+- `requirements.txt` sin motivo justificado
+- `package-lock.json` sin motivo justificado
+- Valores del `.env`
+- Migraciones generadas automáticamente salvo que sea necesario
+
+Nunca eliminar código existente que funcione a menos que se esté reemplazando de forma segura.
+
+---
+
+## Seguridad
+
+Seguir:
 
 - OWASP Top 10
-- JWT secure handling (8h expiration)
-- Input validation using Pydantic
+- Manejo seguro de JWT (expiración de 8 horas)
+- Validación de entrada usando Pydantic
 - Rate limiting
-- Password hashing using bcrypt
-- SQL injection prevention (SQLAlchemy)
+- Hashing de contraseñas con bcrypt
+- Prevención de SQL injection (SQLAlchemy)
 
 ---
 
-## Git Rules
+## Reglas de Git
 
-Use Conventional Commits:
+Utilizar **Conventional Commits**:
 
-feat:
-fix:
-refactor:
-docs:
-test:
-chore:
+- `feat:` nueva funcionalidad
+- `fix:` corrección de errores
+- `refactor:` refactorización de código
+- `docs:` documentación
+- `test:` pruebas
+- `chore:` mantenimiento
 
-Commit after each completed feature.
+**Importante:** Realizar commit después de completar cada funcionalidad.
+
+---
+
+---
+
