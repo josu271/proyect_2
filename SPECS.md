@@ -10,12 +10,6 @@ PostgreSQL (Base de datos)
 FastAPI (Backend en Python)
 React + Vite (Frontend)
 
-##  Tecnología Central
-
-Backtracking
-Forward Checking
-Heurística MRV (Minimum Remaining Values)
-
 ---
 
 # Objetivo del Sistema
