@@ -9,7 +9,6 @@ Desarrollar un sistema inteligente de generación de horarios académicos para c
 PostgreSQL (Base de datos)
 FastAPI (Backend en Python)
 React + Vite (Frontend)
-OR-Tools (Solver CSP)
 
 ##  Tecnología Central
 
@@ -52,9 +51,6 @@ Exportación a PDF (opcional)
 ---
 
 # Actores del Sistema
-
-## Visitante (No autenticado)
-Sin acceso al sistema
 
 ## Estudiante
 Seleccionar cursos
@@ -222,7 +218,6 @@ docentes
 cursos
 aulas
 horarios
-auditoria
 
 Relaciones:
 
