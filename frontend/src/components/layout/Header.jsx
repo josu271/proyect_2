@@ -1,33 +1,34 @@
-import logo from "../../assets/logo.png";
-import { useNavigate } from "react-router-dom";
+import logo from "../../assets/img/logo.png";
 
-function Header({ title = "Sistema de Horarios" }) {
-  const navigate = useNavigate();
-
-  const cerrarSesion = () => {
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("token");
-    navigate("/");
-  };
-
+export default function Header({
+  title = "Panel del Docente",
+  subtitle = "University",
+  onLogout,
+}) {
   return (
-    <header className="admin-layout header">
-      <div className="header-center">
-        <img src={logo} alt="JOSU University" className="logo" />
+    <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white px-8">
+      <div className="flex items-center gap-4">
+        <img
+          src={logo}
+          alt="Logo"
+          className="h-12 w-12 rounded-full object-contain"
+        />
 
-        <div className="header-text">
-          <h1>{title}</h1>
-          <span>University</span>
+        <div>
+          <h1 className="text-2xl font-bold leading-none text-slate-900">
+            {title}
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">{subtitle}</p>
         </div>
       </div>
 
-      <div className="header-right">
-        <button type="button" className="logout-header" onClick={cerrarSesion}>
-          Salir
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={onLogout}
+        className="rounded-full bg-slate-100 px-5 py-3 text-sm font-bold text-slate-900 hover:bg-slate-200"
+      >
+        Salir
+      </button>
     </header>
   );
 }
-
-export default Header;

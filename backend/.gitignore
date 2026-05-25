@@ -1,0 +1,28 @@
+# Entorno virtual
+venv/
+.env/
+.venv/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+# Logs
+*.log
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Archivos temporales
+*.tmp
+*.bak
+
+# pytest
+.pytest_cache/
+
+# Coverage
+htmlcov/
+.coverage

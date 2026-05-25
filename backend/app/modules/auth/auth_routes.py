@@ -1,20 +1,25 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
-from app.modules.auth.auth_service import login_usuario
+from fastapi import APIRouter, HTTPException
 
-router = APIRouter()
+from app.modules.auth.auth_schemas import LoginRequest
+from app.modules.auth.auth_service import login_user
 
-
-class LoginRequest(BaseModel):
-    correo: str
-    contrasena: str
-
+router = APIRouter(
+    prefix="/auth",
+    tags=["Auth"]
+)
 
 @router.post("/login")
 def login(data: LoginRequest):
-    usuario = login_usuario(data.correo, data.contrasena)
 
-    return {
-        "mensaje": "Login correcto",
-        "usuario": usuario
-    }
+    response = login_user(
+        data.correo,
+        data.contrasena
+    )
+
+    if not response:
+        raise HTTPException(
+            status_code=401,
+            detail="Credenciales incorrectas"
+        )
+
+    return response

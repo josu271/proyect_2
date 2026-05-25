@@ -1,239 +1,403 @@
+from math import ceil
+
+import psycopg2
 from fastapi import HTTPException
+
 from app.database import get_connection
 
 
-def listar_docentes():
-    conn = None
-    cursor = None
+def listar_docentes(page: int = 1, limit: int = 10, search: str = ""):
+    page = max(page, 1)
+    limit = 10
+    offset = (page - 1) * limit
+
+    search_text = search.strip()
+    search_like = f"%{search_text}%"
+
+    conn = get_connection()
 
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT COUNT(*) AS total
+                FROM docentes d
+                INNER JOIN usuarios u ON u.id = d.usuario_id
+                WHERE (
+                    %s = ''
+                    OR d.codigo_docente ILIKE %s
+                    OR d.nombre_completo ILIKE %s
+                    OR u.correo ILIKE %s
+                    OR d.especialidad ILIKE %s
+                    OR d.dni ILIKE %s
+                );
+                """,
+                (
+                    search_text,
+                    search_like,
+                    search_like,
+                    search_like,
+                    search_like,
+                    search_like,
+                ),
+            )
 
-        cursor.execute("""
-            SELECT 
-                d.id,
-                d.usuario_id,
-                u.correo,
-                u.activo,
-                d.nombre_completo,
-                d.numero_identificacion,
-                d.telefono,
-                d.especialidad
-            FROM docentes d
-            INNER JOIN usuarios u ON d.usuario_id = u.id
-            ORDER BY d.id DESC;
-        """)
+            total = cursor.fetchone()["total"]
 
-        columnas = [desc[0] for desc in cursor.description]
-        return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+            cursor.execute(
+                """
+                SELECT
+                    d.id,
+                    d.usuario_id,
+                    d.codigo_docente,
+                    d.dni,
+                    d.nombre_completo,
+                    u.correo,
+                    d.especialidad,
+                    d.activo,
+                    u.activo AS usuario_activo,
+                    d.fecha_registro
+                FROM docentes d
+                INNER JOIN usuarios u ON u.id = d.usuario_id
+                WHERE (
+                    %s = ''
+                    OR d.codigo_docente ILIKE %s
+                    OR d.nombre_completo ILIKE %s
+                    OR u.correo ILIKE %s
+                    OR d.especialidad ILIKE %s
+                    OR d.dni ILIKE %s
+                )
+                ORDER BY d.id DESC
+                LIMIT %s OFFSET %s;
+                """,
+                (
+                    search_text,
+                    search_like,
+                    search_like,
+                    search_like,
+                    search_like,
+                    search_like,
+                    limit,
+                    offset,
+                ),
+            )
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+            docentes = [dict(row) for row in cursor.fetchall()]
+
+            return {
+                "items": docentes,
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "total_pages": max(1, ceil(total / limit)) if total else 1,
+            }
 
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        conn.close()
 
 
 def obtener_docente(docente_id: int):
-    conn = None
-    cursor = None
+    conn = get_connection()
 
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            SELECT 
-                d.id,
-                d.usuario_id,
-                u.correo,
-                u.activo,
-                d.nombre_completo,
-                d.numero_identificacion,
-                d.telefono,
-                d.especialidad
-            FROM docentes d
-            INNER JOIN usuarios u ON d.usuario_id = u.id
-            WHERE d.id = %s;
-        """, (docente_id,))
-
-        fila = cursor.fetchone()
-
-        if not fila:
-            raise HTTPException(status_code=404, detail="Docente no encontrado")
-
-        columnas = [desc[0] for desc in cursor.description]
-        return dict(zip(columnas, fila))
-
-    except HTTPException:
-        raise
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
-
-def crear_docente(data):
-    conn = None
-    cursor = None
-
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("BEGIN;")
-
-        cursor.execute("""
-            INSERT INTO usuarios (correo, contrasena_hash, activo)
-            VALUES (%s, crypt(%s, gen_salt('bf')), TRUE)
-            RETURNING id;
-        """, (
-            data.correo,
-            data.contrasena
-        ))
-
-        usuario_id = cursor.fetchone()[0]
-
-        cursor.execute("""
-            INSERT INTO docentes (
-                usuario_id,
-                nombre_completo,
-                numero_identificacion,
-                telefono,
-                correo,
-                especialidad,
-                activo
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT
+                    d.id,
+                    d.usuario_id,
+                    d.codigo_docente,
+                    d.dni,
+                    d.nombre_completo,
+                    u.correo,
+                    d.especialidad,
+                    d.activo,
+                    u.activo AS usuario_activo,
+                    d.fecha_registro
+                FROM docentes d
+                INNER JOIN usuarios u ON u.id = d.usuario_id
+                WHERE d.id = %s;
+                """,
+                (docente_id,),
             )
-            VALUES (%s, %s, %s, %s, %s, %s, TRUE)
-            RETURNING id;
-        """, (
-            usuario_id,
-            data.nombre_completo,
-            data.numero_identificacion,
-            data.telefono,
-            data.correo,
-            data.especialidad
-        ))
 
-        docente_id = cursor.fetchone()[0]
+            docente = cursor.fetchone()
 
-        cursor.execute("""
-            SELECT id FROM roles WHERE nombre = 'DOCENTE';
-        """)
+            if not docente:
+                raise HTTPException(status_code=404, detail="Docente no encontrado.")
 
-        rol = cursor.fetchone()
-
-        if not rol:
-            raise HTTPException(status_code=400, detail="Rol DOCENTE no existe")
-
-        rol_id = rol[0]
-
-        cursor.execute("""
-            INSERT INTO usuario_roles (usuario_id, rol_id)
-            VALUES (%s, %s);
-        """, (
-            usuario_id,
-            rol_id
-        ))
-
-        conn.commit()
-
-        return {
-            "mensaje": "Docente creado correctamente",
-            "docente_id": docente_id,
-            "usuario_id": str(usuario_id)
-        }
-
-    except HTTPException:
-        if conn:
-            conn.rollback()
-        raise
-
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+            return dict(docente)
 
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        conn.close()
 
 
-def actualizar_docente(docente_id: int, data):
-    conn = None
-    cursor = None
+def crear_docente(docente):
+    conn = get_connection()
 
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO usuarios (
+                    correo,
+                    contrasena_hash,
+                    rol,
+                    activo
+                )
+                VALUES (
+                    %s,
+                    crypt(%s, gen_salt('bf')),
+                    'DOCENTE',
+                    %s
+                )
+                RETURNING id;
+                """,
+                (
+                    docente.correo.lower().strip(),
+                    docente.contrasena,
+                    docente.activo,
+                ),
+            )
 
-        cursor.execute("BEGIN;")
+            usuario_id = cursor.fetchone()["id"]
 
-        cursor.execute("""
-            UPDATE docentes
-            SET 
-                nombre_completo = %s,
-                numero_identificacion = %s,
-                telefono = %s,
-                especialidad = %s,
-                activo = %s
-            WHERE id = %s
-            RETURNING usuario_id;
-        """, (
-            data.nombre_completo,
-            data.numero_identificacion,
-            data.telefono,
-            data.especialidad,
-            data.activo,
-            docente_id
-        ))
+            cursor.execute(
+                """
+                INSERT INTO docentes (
+                    usuario_id,
+                    codigo_docente,
+                    dni,
+                    nombre_completo,
+                    especialidad,
+                    activo
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
+                RETURNING id;
+                """,
+                (
+                    usuario_id,
+                    docente.codigo_docente.strip().upper(),
+                    docente.dni.strip() if docente.dni else None,
+                    docente.nombre_completo.strip(),
+                    docente.especialidad.strip() if docente.especialidad else None,
+                    docente.activo,
+                ),
+            )
 
-        fila = cursor.fetchone()
+            docente_id = cursor.fetchone()["id"]
+            conn.commit()
 
-        if not fila:
-            raise HTTPException(status_code=404, detail="Docente no encontrado")
+            return obtener_docente(docente_id)
 
-        usuario_id = fila[0]
+    except psycopg2.errors.UniqueViolation as error:
+        conn.rollback()
 
-        cursor.execute("""
-            UPDATE usuarios
-            SET activo = %s
-            WHERE id = %s;
-        """, (
-            data.activo,
-            usuario_id
-        ))
+        mensaje = str(error)
 
-        conn.commit()
+        if "usuarios_correo_key" in mensaje:
+            detalle = "Ya existe un usuario con ese correo."
+        elif "docentes_codigo_docente_key" in mensaje:
+            detalle = "Ya existe un docente con ese código."
+        elif "docentes_dni_key" in mensaje:
+            detalle = "Ya existe un docente con ese DNI."
+        else:
+            detalle = "Ya existe un registro duplicado."
 
-        return {
-            "mensaje": "Docente actualizado correctamente",
-            "docente_id": docente_id
-        }
+        raise HTTPException(status_code=400, detail=detalle)
 
     except HTTPException:
-        if conn:
-            conn.rollback()
+        conn.rollback()
         raise
 
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as error:
+        conn.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al crear docente: {str(error)}",
+        )
 
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        conn.close()
+
+
+def actualizar_docente(docente_id: int, docente):
+    conn = get_connection()
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT usuario_id
+                FROM docentes
+                WHERE id = %s;
+                """,
+                (docente_id,),
+            )
+
+            docente_actual = cursor.fetchone()
+
+            if not docente_actual:
+                raise HTTPException(status_code=404, detail="Docente no encontrado.")
+
+            usuario_id = docente_actual["usuario_id"]
+
+            if docente.contrasena:
+                cursor.execute(
+                    """
+                    UPDATE usuarios
+                    SET
+                        correo = %s,
+                        contrasena_hash = crypt(%s, gen_salt('bf')),
+                        activo = %s
+                    WHERE id = %s;
+                    """,
+                    (
+                        docente.correo.lower().strip(),
+                        docente.contrasena,
+                        docente.activo,
+                        usuario_id,
+                    ),
+                )
+            else:
+                cursor.execute(
+                    """
+                    UPDATE usuarios
+                    SET
+                        correo = %s,
+                        activo = %s
+                    WHERE id = %s;
+                    """,
+                    (
+                        docente.correo.lower().strip(),
+                        docente.activo,
+                        usuario_id,
+                    ),
+                )
+
+            cursor.execute(
+                """
+                UPDATE docentes
+                SET
+                    codigo_docente = %s,
+                    dni = %s,
+                    nombre_completo = %s,
+                    especialidad = %s,
+                    activo = %s
+                WHERE id = %s
+                RETURNING id;
+                """,
+                (
+                    docente.codigo_docente.strip().upper(),
+                    docente.dni.strip() if docente.dni else None,
+                    docente.nombre_completo.strip(),
+                    docente.especialidad.strip() if docente.especialidad else None,
+                    docente.activo,
+                    docente_id,
+                ),
+            )
+
+            actualizado = cursor.fetchone()
+
+            if not actualizado:
+                raise HTTPException(status_code=404, detail="Docente no encontrado.")
+
+            conn.commit()
+
+            return obtener_docente(docente_id)
+
+    except psycopg2.errors.UniqueViolation as error:
+        conn.rollback()
+
+        mensaje = str(error)
+
+        if "usuarios_correo_key" in mensaje:
+            detalle = "Ya existe otro usuario con ese correo."
+        elif "docentes_codigo_docente_key" in mensaje:
+            detalle = "Ya existe otro docente con ese código."
+        elif "docentes_dni_key" in mensaje:
+            detalle = "Ya existe otro docente con ese DNI."
+        else:
+            detalle = "Ya existe un registro duplicado."
+
+        raise HTTPException(status_code=400, detail=detalle)
+
+    except HTTPException:
+        conn.rollback()
+        raise
+
+    except Exception as error:
+        conn.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al actualizar docente: {str(error)}",
+        )
+
+    finally:
+        conn.close()
+
+
+def eliminar_docente(docente_id: int):
+    """
+    Eliminación lógica.
+    No borra físicamente porque el docente puede estar relacionado con cursos,
+    secciones, disponibilidad u horarios.
+    """
+    conn = get_connection()
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT usuario_id
+                FROM docentes
+                WHERE id = %s;
+                """,
+                (docente_id,),
+            )
+
+            docente = cursor.fetchone()
+
+            if not docente:
+                raise HTTPException(status_code=404, detail="Docente no encontrado.")
+
+            usuario_id = docente["usuario_id"]
+
+            cursor.execute(
+                """
+                UPDATE docentes
+                SET activo = FALSE
+                WHERE id = %s;
+                """,
+                (docente_id,),
+            )
+
+            cursor.execute(
+                """
+                UPDATE usuarios
+                SET activo = FALSE
+                WHERE id = %s;
+                """,
+                (usuario_id,),
+            )
+
+            conn.commit()
+
+            return {
+                "message": "Docente desactivado correctamente.",
+                "id": docente_id,
+            }
+
+    except HTTPException:
+        conn.rollback()
+        raise
+
+    except Exception as error:
+        conn.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al eliminar docente: {str(error)}",
+        )
+
+    finally:
+        conn.close()

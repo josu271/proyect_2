@@ -2,36 +2,48 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.modules.auth.auth_routes import router as auth_router
-from app.modules.admin.estudiantes.estudiantes_routes import router as estudiantes_router
-from app.modules.admin.docentes.docentes_routes import router as docentes_router
 from app.modules.admin.cursos.cursos_routes import router as cursos_router
-from app.modules.teacher.disponibilidad.disponibilidad_routes import router as disponibilidad_router
-from app.modules.teacher.cursos.cursos_routes import router as teacher_cursos_router
-from app.modules.teacher.horario.horario_routes import router as teacher_horario_router
-from app.modules.student.matricula.matricula_routes import router as matricula_student_router
-from app.modules.student.horario.horario_routes import router as horario_student_router
+from app.modules.admin.docentes.docentes_routes import router as docentes_router
+from app.modules.admin.estudiantes.estudiantes_routes import router as estudiantes_router
+from app.modules.admin.aulas.aulas_routes import router as aulas_router
+from app.modules.admin.secciones.secciones_routes import router as secciones_router
+from app.modules.docente.disponibilidad.disponibilidad_routes import router as disponibilidad_docente_router
+from app.modules.docente.mi_horario.mi_horario_routes import (router as mi_horario_docente_router,)
+from app.modules.docente.mis_cursos.mis_cursos_routes import (router as mis_cursos_docente_router,)
+from app.modules.estudiante.matricula.matricula_routes import router as estudiante_matricula_router
+from app.modules.estudiante.mi_horario.mi_horario_routes import router as mi_horario_estudiante_router
+from app.modules.estudiante.historial_academico.historial_academico_routes import router as historial_academico_router
+from app.modules.estudiante.mis_cursos.mis_cursos_routes import router as mis_cursos_estudiante_router
 
+app = FastAPI(title="Sistema de Horarios Académicos")
 
-
-app = FastAPI()
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(auth_router, prefix="/auth", tags=["Auth"])
-app.include_router(estudiantes_router, prefix="/admin/estudiantes", tags=["Admin - Estudiantes"])
-app.include_router(docentes_router,prefix="/admin/docentes",tags=["Admin - Docentes"])
-app.include_router(cursos_router,prefix="/admin/cursos",tags=["Admin - Cursos"])
-app.include_router(disponibilidad_router, prefix="/teacher/disponibilidad", tags=["Teacher - Disponibilidad"])
-app.include_router(teacher_cursos_router, prefix="/teacher/cursos", tags=["Teacher - Cursos"])
-app.include_router(teacher_horario_router, prefix="/teacher/horario", tags=["Teacher - Horario"])
-app.include_router(matricula_student_router, prefix="/student/matricula", tags=["Matrícula Estudiante"])
-app.include_router(horario_student_router, prefix="/student/horario", tags=["Horario Estudiante"])
+app.include_router(auth_router)
+app.include_router(cursos_router)
+app.include_router(docentes_router)
+app.include_router(estudiantes_router)
+app.include_router(aulas_router)
+app.include_router(secciones_router)
+app.include_router(disponibilidad_docente_router)
+app.include_router(mi_horario_docente_router)
+app.include_router(mis_cursos_docente_router)
+app.include_router(estudiante_matricula_router)
+app.include_router(mi_horario_estudiante_router)
+app.include_router(historial_academico_router)
+app.include_router(mis_cursos_estudiante_router)
+
 @app.get("/")
-def inicio():
-    return {"mensaje": "Backend funcionando"}
+def root():
+    return {"message": "API funcionando"}
