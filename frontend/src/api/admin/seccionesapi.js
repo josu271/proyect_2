@@ -26,6 +26,33 @@ export function listarOpcionesSeccion() {
   return request(`${BASE_URL}/opciones`);
 }
 
+export function buscarCursosSeccion({ search = "", limit = 5 } = {}) {
+  const params = new URLSearchParams({
+    search,
+    limit: String(limit),
+  });
+
+  return request(`${BASE_URL}/opciones/cursos?${params.toString()}`);
+}
+
+export function buscarDocentesSeccion({ search = "", limit = 5 } = {}) {
+  const params = new URLSearchParams({
+    search,
+    limit: String(limit),
+  });
+
+  return request(`${BASE_URL}/opciones/docentes?${params.toString()}`);
+}
+
+export function buscarAulasSeccion({ search = "", limit = 5 } = {}) {
+  const params = new URLSearchParams({
+    search,
+    limit: String(limit),
+  });
+
+  return request(`${BASE_URL}/opciones/aulas?${params.toString()}`);
+}
+
 export function listarSecciones({ page = 1, limit = 10, search = "" } = {}) {
   const params = new URLSearchParams({
     page: String(page),

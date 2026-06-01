@@ -6,6 +6,9 @@ from fastapi import HTTPException
 from app.database import get_connection
 
 
+MAX_OPCIONES = 5
+
+
 def obtener_semestre_activo(cursor):
     cursor.execute(
         """
@@ -153,48 +156,145 @@ def asegurar_asignacion_docente_curso(
 
 
 def listar_opciones():
+    """
+    Optimizado:
+    Ya no carga todos los cursos/docentes/aulas.
+    Solo devuelve el semestre activo.
+    Las búsquedas se hacen por endpoints separados.
+    """
+    conn = get_connection()
+
+    try:
+        with conn.cursor() as cursor:
+            semestre = obtener_semestre_activo(cursor)
+
+            return {
+                "semestre": semestre,
+                "cursos": [],
+                "docentes": [],
+                "aulas": [],
+            }
+
+    finally:
+        conn.close()
+
+
+def buscar_cursos_opciones(search: str = "", limit: int = 5):
+    search_text = search.strip()
+    search_like = f"%{search_text}%"
+    limit = min(max(limit, 1), MAX_OPCIONES)
+
     conn = get_connection()
 
     try:
         with conn.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT id, nombre
+                SELECT
+                    id,
+                    nombre,
+                    creditos,
+                    ciclo,
+                    tipo_aula_requerida
                 FROM cursos
                 WHERE activo = TRUE
-                ORDER BY nombre ASC;
-                """
+                  AND (
+                    %s = ''
+                    OR nombre ILIKE %s
+                  )
+                ORDER BY nombre ASC
+                LIMIT %s;
+                """,
+                (
+                    search_text,
+                    search_like,
+                    limit,
+                ),
             )
-            cursos = [dict(row) for row in cursor.fetchall()]
 
+            return [dict(row) for row in cursor.fetchall()]
+
+    finally:
+        conn.close()
+
+
+def buscar_docentes_opciones(search: str = "", limit: int = 5):
+    search_text = search.strip()
+    search_like = f"%{search_text}%"
+    limit = min(max(limit, 1), MAX_OPCIONES)
+
+    conn = get_connection()
+
+    try:
+        with conn.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT id, nombre_completo
+                SELECT
+                    id,
+                    nombre_completo,
+                    especialidad
                 FROM docentes
                 WHERE activo = TRUE
-                ORDER BY nombre_completo ASC;
-                """
+                  AND (
+                    %s = ''
+                    OR nombre_completo ILIKE %s
+                    OR especialidad ILIKE %s
+                  )
+                ORDER BY nombre_completo ASC
+                LIMIT %s;
+                """,
+                (
+                    search_text,
+                    search_like,
+                    search_like,
+                    limit,
+                ),
             )
-            docentes = [dict(row) for row in cursor.fetchall()]
 
+            return [dict(row) for row in cursor.fetchall()]
+
+    finally:
+        conn.close()
+
+
+def buscar_aulas_opciones(search: str = "", limit: int = 5):
+    search_text = search.strip()
+    search_like = f"%{search_text}%"
+    limit = min(max(limit, 1), MAX_OPCIONES)
+
+    conn = get_connection()
+
+    try:
+        with conn.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT id, codigo, tipo_aula, capacidad, ubicacion
+                SELECT
+                    id,
+                    codigo,
+                    tipo_aula,
+                    capacidad,
+                    ubicacion
                 FROM aulas
                 WHERE activa = TRUE
-                ORDER BY codigo ASC;
-                """
+                  AND (
+                    %s = ''
+                    OR codigo ILIKE %s
+                    OR tipo_aula ILIKE %s
+                    OR ubicacion ILIKE %s
+                  )
+                ORDER BY codigo ASC
+                LIMIT %s;
+                """,
+                (
+                    search_text,
+                    search_like,
+                    search_like,
+                    search_like,
+                    limit,
+                ),
             )
-            aulas = [dict(row) for row in cursor.fetchall()]
 
-            semestre = obtener_semestre_activo(cursor)
-
-            return {
-                "cursos": cursos,
-                "docentes": docentes,
-                "aulas": aulas,
-                "semestre": semestre,
-            }
+            return [dict(row) for row in cursor.fetchall()]
 
     finally:
         conn.close()

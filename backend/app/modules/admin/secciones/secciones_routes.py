@@ -3,6 +3,9 @@ from fastapi import APIRouter, Query
 from app.modules.admin.secciones.secciones_schemas import SeccionCreate, SeccionUpdate
 from app.modules.admin.secciones.secciones_service import (
     listar_opciones,
+    buscar_cursos_opciones,
+    buscar_docentes_opciones,
+    buscar_aulas_opciones,
     listar_secciones,
     obtener_seccion,
     crear_seccion,
@@ -19,6 +22,30 @@ router = APIRouter(
 @router.get("/opciones")
 def route_listar_opciones():
     return listar_opciones()
+
+
+@router.get("/opciones/cursos")
+def route_buscar_cursos_opciones(
+    search: str = Query("", max_length=100),
+    limit: int = Query(5, ge=1, le=5),
+):
+    return buscar_cursos_opciones(search=search, limit=limit)
+
+
+@router.get("/opciones/docentes")
+def route_buscar_docentes_opciones(
+    search: str = Query("", max_length=100),
+    limit: int = Query(5, ge=1, le=5),
+):
+    return buscar_docentes_opciones(search=search, limit=limit)
+
+
+@router.get("/opciones/aulas")
+def route_buscar_aulas_opciones(
+    search: str = Query("", max_length=100),
+    limit: int = Query(5, ge=1, le=5),
+):
+    return buscar_aulas_opciones(search=search, limit=limit)
 
 
 @router.get("")

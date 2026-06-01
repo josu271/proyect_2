@@ -1097,3 +1097,265 @@ ADD COLUMN IF NOT EXISTS aula_id BIGINT REFERENCES aulas(id);
 
 CREATE INDEX IF NOT EXISTS idx_secciones_aula
 ON secciones(aula_id);
+
+
+
+-- =========================================================
+-- OPTIMIZACIÓN POR ÍNDICES
+-- Sistema de Horarios Académicos
+-- Seguro: no cambia código ni borra datos.
+-- =========================================================
+
+-- Para búsquedas con ILIKE '%texto%'
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- =========================================================
+-- USUARIOS
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_usuarios_rol_activo
+ON usuarios (rol, activo);
+
+-- correo ya tiene UNIQUE, no hace falta otro índice.
+
+
+-- =========================================================
+-- PROGRAMAS ACADÉMICOS
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_programas_activo_nombre
+ON programas_academicos (activo, nombre);
+
+CREATE INDEX IF NOT EXISTS idx_programas_nombre_trgm
+ON programas_academicos
+USING gin (nombre gin_trgm_ops);
+
+
+-- =========================================================
+-- SEMESTRES ACADÉMICOS
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_semestres_estado_fecha
+ON semestres_academicos (estado, fecha_inicio DESC);
+
+
+-- =========================================================
+-- DOCENTES
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_docentes_activo_nombre
+ON docentes (activo, nombre_completo);
+
+CREATE INDEX IF NOT EXISTS idx_docentes_nombre_trgm
+ON docentes
+USING gin (nombre_completo gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_docentes_especialidad_trgm
+ON docentes
+USING gin (especialidad gin_trgm_ops);
+
+
+-- =========================================================
+-- ESTUDIANTES
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_estudiantes_usuario
+ON estudiantes (usuario_id);
+
+CREATE INDEX IF NOT EXISTS idx_estudiantes_programa_activo
+ON estudiantes (programa_id, activo);
+
+CREATE INDEX IF NOT EXISTS idx_estudiantes_ciclo
+ON estudiantes (ciclo);
+
+CREATE INDEX IF NOT EXISTS idx_estudiantes_nombre_trgm
+ON estudiantes
+USING gin (nombre_completo gin_trgm_ops);
+
+
+-- =========================================================
+-- AULAS
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_aulas_activa_codigo
+ON aulas (activa, codigo);
+
+CREATE INDEX IF NOT EXISTS idx_aulas_tipo_activa
+ON aulas (tipo_aula, activa);
+
+CREATE INDEX IF NOT EXISTS idx_aulas_codigo_trgm
+ON aulas
+USING gin (codigo gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_aulas_ubicacion_trgm
+ON aulas
+USING gin (ubicacion gin_trgm_ops);
+
+
+-- =========================================================
+-- CURSOS
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_cursos_programa_activo
+ON cursos (programa_id, activo);
+
+CREATE INDEX IF NOT EXISTS idx_cursos_ciclo
+ON cursos (ciclo);
+
+CREATE INDEX IF NOT EXISTS idx_cursos_tipo_aula
+ON cursos (tipo_aula_requerida);
+
+CREATE INDEX IF NOT EXISTS idx_cursos_nombre_trgm
+ON cursos
+USING gin (nombre gin_trgm_ops);
+
+CREATE INDEX IF NOT EXISTS idx_cursos_codigo_trgm
+ON cursos
+USING gin (codigo gin_trgm_ops);
+
+
+-- =========================================================
+-- CURSO PRERREQUISITOS
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_prerequisitos_curso
+ON curso_prerequisitos (curso_id);
+
+CREATE INDEX IF NOT EXISTS idx_prerequisitos_prerequisito
+ON curso_prerequisitos (prerequisito_curso_id);
+
+
+-- =========================================================
+-- DOCENTE CURSO ASIGNADO
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_dca_docente_semestre_estado
+ON docente_curso_asignado (docente_id, semestre_id, estado);
+
+CREATE INDEX IF NOT EXISTS idx_dca_curso_semestre_estado
+ON docente_curso_asignado (curso_id, semestre_id, estado);
+
+-- Ya tienes uq_docente_curso_semestre_activo, no se duplica.
+
+
+-- =========================================================
+-- SECCIONES / NRC
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_secciones_curso
+ON secciones (curso_id);
+
+CREATE INDEX IF NOT EXISTS idx_secciones_docente
+ON secciones (docente_id);
+
+CREATE INDEX IF NOT EXISTS idx_secciones_semestre_estado
+ON secciones (semestre_id, estado);
+
+CREATE INDEX IF NOT EXISTS idx_secciones_docente_semestre
+ON secciones (docente_id, semestre_id);
+
+CREATE INDEX IF NOT EXISTS idx_secciones_curso_semestre
+ON secciones (curso_id, semestre_id);
+
+-- Si agregaste aula_id a secciones, este índice sirve.
+CREATE INDEX IF NOT EXISTS idx_secciones_aula
+ON secciones (aula_id);
+
+CREATE INDEX IF NOT EXISTS idx_secciones_nrc_trgm
+ON secciones
+USING gin (nrc gin_trgm_ops);
+
+
+-- =========================================================
+-- DISPONIBILIDAD DOCENTE
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_disponibilidad_docente_semestre
+ON disponibilidad_docente (docente_id, semestre_id);
+
+CREATE INDEX IF NOT EXISTS idx_disponibilidad_docente_bloque
+ON disponibilidad_docente (
+    docente_id,
+    semestre_id,
+    dia_semana,
+    bloque_academico_id,
+    disponible
+);
+
+
+-- =========================================================
+-- DISPONIBILIDAD ESTUDIANTE
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_disponibilidad_estudiante_semestre
+ON disponibilidad_estudiante (estudiante_id, semestre_id);
+
+CREATE INDEX IF NOT EXISTS idx_disponibilidad_estudiante_bloque
+ON disponibilidad_estudiante (
+    estudiante_id,
+    semestre_id,
+    dia_semana,
+    bloque_academico_id,
+    disponible
+);
+
+
+-- =========================================================
+-- BLOQUES HORARIO
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_bloques_horario_aula_dia_bloque
+ON bloques_horario (aula_id, dia_semana, bloque_academico_id);
+
+CREATE INDEX IF NOT EXISTS idx_bloques_horario_dia_bloque
+ON bloques_horario (dia_semana, bloque_academico_id);
+
+CREATE INDEX IF NOT EXISTS idx_bloques_horario_bloque
+ON bloques_horario (bloque_academico_id);
+
+-- seccion_id ya es UNIQUE en bloques_horario, no necesita otro índice.
+
+
+-- =========================================================
+-- MATRÍCULAS
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_matriculas_estudiante_estado
+ON matriculas (estudiante_id, estado);
+
+CREATE INDEX IF NOT EXISTS idx_matriculas_semestre_estado
+ON matriculas (semestre_id, estado);
+
+-- UNIQUE (estudiante_id, semestre_id) ya crea índice.
+
+
+-- =========================================================
+-- MATRÍCULA DETALLE
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_matricula_detalle_matricula_estado
+ON matricula_detalle (matricula_id, estado);
+
+CREATE INDEX IF NOT EXISTS idx_matricula_detalle_seccion_estado
+ON matricula_detalle (seccion_id, estado);
+
+-- UNIQUE (matricula_id, seccion_id) ya crea índice.
+
+
+-- =========================================================
+-- HISTORIAL ACADÉMICO
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_historial_estudiante_estado
+ON historial_academico (estudiante_id, estado);
+
+CREATE INDEX IF NOT EXISTS idx_historial_estudiante_curso_estado
+ON historial_academico (estudiante_id, curso_id, estado);
+
+CREATE INDEX IF NOT EXISTS idx_historial_curso
+ON historial_academico (curso_id);
+
+CREATE INDEX IF NOT EXISTS idx_historial_semestre
+ON historial_academico (semestre_id);
+
+-- UNIQUE (estudiante_id, curso_id, semestre_id) ya crea índice.

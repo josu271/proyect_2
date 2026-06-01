@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import {
   listarOpcionesSeccion,
+  buscarCursosSeccion,
+  buscarDocentesSeccion,
+  buscarAulasSeccion,
   listarSecciones,
   crearSeccion,
   actualizarSeccion,
@@ -24,15 +27,26 @@ const estadoLabel = {
 
 export default function SeccionesNrcAdmin() {
   const [secciones, setSecciones] = useState([]);
-  const [opciones, setOpciones] = useState({
-    cursos: [],
-    docentes: [],
-    aulas: [],
-    semestre: null,
-  });
+
+  const [semestre, setSemestre] = useState(null);
 
   const [form, setForm] = useState(FORM_INICIAL);
   const [editandoId, setEditandoId] = useState(null);
+
+  const [cursoTexto, setCursoTexto] = useState("");
+  const [cursoResultados, setCursoResultados] = useState([]);
+  const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
+  const [buscandoCursos, setBuscandoCursos] = useState(false);
+
+  const [docenteTexto, setDocenteTexto] = useState("");
+  const [docenteResultados, setDocenteResultados] = useState([]);
+  const [docenteSeleccionado, setDocenteSeleccionado] = useState(null);
+  const [buscandoDocentes, setBuscandoDocentes] = useState(false);
+
+  const [aulaTexto, setAulaTexto] = useState("");
+  const [aulaResultados, setAulaResultados] = useState([]);
+  const [aulaSeleccionada, setAulaSeleccionada] = useState(null);
+  const [buscandoAulas, setBuscandoAulas] = useState(false);
 
   const [busqueda, setBusqueda] = useState("");
   const [page, setPage] = useState(1);
@@ -49,20 +63,10 @@ export default function SeccionesNrcAdmin() {
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
 
-  const aulaSeleccionada = opciones.aulas.find(
-    (aula) => String(aula.id) === String(form.aula_id)
-  );
-
   const cargarOpciones = async () => {
     try {
       const data = await listarOpcionesSeccion();
-
-      setOpciones({
-        cursos: data.cursos || [],
-        docentes: data.docentes || [],
-        aulas: data.aulas || [],
-        semestre: data.semestre || null,
-      });
+      setSemestre(data.semestre || null);
     } catch (err) {
       setError(err.message);
     }
@@ -102,6 +106,90 @@ export default function SeccionesNrcAdmin() {
     cargarSecciones();
   }, [page, busqueda]);
 
+  useEffect(() => {
+    const texto = cursoTexto.trim();
+
+    if (texto.length < 2 || form.curso_id) {
+      setCursoResultados([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setBuscandoCursos(true);
+
+        const data = await buscarCursosSeccion({
+          search: texto,
+          limit: 5,
+        });
+
+        setCursoResultados(data || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setBuscandoCursos(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [cursoTexto, form.curso_id]);
+
+  useEffect(() => {
+    const texto = docenteTexto.trim();
+
+    if (texto.length < 2 || form.docente_id) {
+      setDocenteResultados([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setBuscandoDocentes(true);
+
+        const data = await buscarDocentesSeccion({
+          search: texto,
+          limit: 5,
+        });
+
+        setDocenteResultados(data || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setBuscandoDocentes(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [docenteTexto, form.docente_id]);
+
+  useEffect(() => {
+    const texto = aulaTexto.trim();
+
+    if (texto.length < 1 || form.aula_id) {
+      setAulaResultados([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setBuscandoAulas(true);
+
+        const data = await buscarAulasSeccion({
+          search: texto,
+          limit: 5,
+        });
+
+        setAulaResultados(data || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setBuscandoAulas(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [aulaTexto, form.aula_id]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -111,9 +199,87 @@ export default function SeccionesNrcAdmin() {
     }));
   };
 
+  const seleccionarCurso = (curso) => {
+    setForm((prev) => ({
+      ...prev,
+      curso_id: String(curso.id),
+    }));
+
+    setCursoSeleccionado(curso);
+    setCursoTexto(curso.nombre);
+    setCursoResultados([]);
+  };
+
+  const limpiarCurso = () => {
+    setForm((prev) => ({
+      ...prev,
+      curso_id: "",
+    }));
+
+    setCursoSeleccionado(null);
+    setCursoTexto("");
+    setCursoResultados([]);
+  };
+
+  const seleccionarDocente = (docente) => {
+    setForm((prev) => ({
+      ...prev,
+      docente_id: String(docente.id),
+    }));
+
+    setDocenteSeleccionado(docente);
+    setDocenteTexto(docente.nombre_completo);
+    setDocenteResultados([]);
+  };
+
+  const limpiarDocente = () => {
+    setForm((prev) => ({
+      ...prev,
+      docente_id: "",
+    }));
+
+    setDocenteSeleccionado(null);
+    setDocenteTexto("");
+    setDocenteResultados([]);
+  };
+
+  const seleccionarAula = (aula) => {
+    setForm((prev) => ({
+      ...prev,
+      aula_id: String(aula.id),
+    }));
+
+    setAulaSeleccionada(aula);
+    setAulaTexto(`${aula.codigo} - ${aula.tipo_aula} - Capacidad ${aula.capacidad}`);
+    setAulaResultados([]);
+  };
+
+  const limpiarAula = () => {
+    setForm((prev) => ({
+      ...prev,
+      aula_id: "",
+    }));
+
+    setAulaSeleccionada(null);
+    setAulaTexto("");
+    setAulaResultados([]);
+  };
+
   const limpiarFormulario = () => {
     setForm(FORM_INICIAL);
     setEditandoId(null);
+
+    setCursoTexto("");
+    setCursoResultados([]);
+    setCursoSeleccionado(null);
+
+    setDocenteTexto("");
+    setDocenteResultados([]);
+    setDocenteSeleccionado(null);
+
+    setAulaTexto("");
+    setAulaResultados([]);
+    setAulaSeleccionada(null);
   };
 
   const validarFormulario = () => {
@@ -184,6 +350,33 @@ export default function SeccionesNrcAdmin() {
       docente_id: seccion.docente_id ? String(seccion.docente_id) : "",
       aula_id: seccion.aula_id ? String(seccion.aula_id) : "",
     });
+
+    setCursoTexto(seccion.curso || "");
+    setCursoSeleccionado({
+      id: seccion.curso_id,
+      nombre: seccion.curso,
+    });
+    setCursoResultados([]);
+
+    setDocenteTexto(seccion.docente || "");
+    setDocenteSeleccionado({
+      id: seccion.docente_id,
+      nombre_completo: seccion.docente,
+    });
+    setDocenteResultados([]);
+
+    setAulaTexto(
+      `${seccion.aula || ""} - ${seccion.tipo_aula || ""} - Capacidad ${
+        seccion.capacidad_aula || ""
+      }`
+    );
+    setAulaSeleccionada({
+      id: seccion.aula_id,
+      codigo: seccion.aula,
+      tipo_aula: seccion.tipo_aula,
+      capacidad: seccion.capacidad_aula,
+    });
+    setAulaResultados([]);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -259,61 +452,183 @@ export default function SeccionesNrcAdmin() {
               />
             </div>
 
-            <div>
+            <div className="relative">
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Curso
               </label>
-              <select
-                name="curso_id"
-                value={form.curso_id}
-                onChange={handleChange}
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/20"
-              >
-                <option value="">Seleccione curso</option>
-                {opciones.cursos.map((curso) => (
-                  <option key={curso.id} value={curso.id}>
-                    {curso.nombre}
-                  </option>
-                ))}
-              </select>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={cursoTexto}
+                  onChange={(e) => {
+                    setCursoTexto(e.target.value);
+                    if (form.curso_id) limpiarCurso();
+                  }}
+                  placeholder="Escriba el nombre del curso..."
+                  className="h-12 flex-1 rounded-xl border border-slate-300 px-4 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/20"
+                />
+
+                {form.curso_id && (
+                  <button
+                    type="button"
+                    onClick={limpiarCurso}
+                    className="h-12 rounded-xl border border-slate-300 px-3 text-sm font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {buscandoCursos && (
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  Buscando cursos...
+                </p>
+              )}
+
+              {cursoResultados.length > 0 && (
+                <div className="absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                  {cursoResultados.map((curso) => (
+                    <button
+                      key={curso.id}
+                      type="button"
+                      onClick={() => seleccionarCurso(curso)}
+                      className="block w-full border-b border-slate-100 px-4 py-3 text-left text-sm hover:bg-blue-50"
+                    >
+                      <span className="block font-bold text-slate-800">
+                        {curso.nombre}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-500">
+                        Ciclo {curso.ciclo || "-"} · {curso.creditos} créditos ·{" "}
+                        {curso.tipo_aula_requerida}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {form.curso_id && (
+                <p className="mt-2 text-xs font-bold text-green-700">
+                  Curso seleccionado correctamente.
+                </p>
+              )}
             </div>
 
-            <div>
+            <div className="relative">
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Docente
               </label>
-              <select
-                name="docente_id"
-                value={form.docente_id}
-                onChange={handleChange}
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/20"
-              >
-                <option value="">Seleccione docente</option>
-                {opciones.docentes.map((docente) => (
-                  <option key={docente.id} value={docente.id}>
-                    {docente.nombre_completo}
-                  </option>
-                ))}
-              </select>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={docenteTexto}
+                  onChange={(e) => {
+                    setDocenteTexto(e.target.value);
+                    if (form.docente_id) limpiarDocente();
+                  }}
+                  placeholder="Escriba el nombre del docente..."
+                  className="h-12 flex-1 rounded-xl border border-slate-300 px-4 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/20"
+                />
+
+                {form.docente_id && (
+                  <button
+                    type="button"
+                    onClick={limpiarDocente}
+                    className="h-12 rounded-xl border border-slate-300 px-3 text-sm font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {buscandoDocentes && (
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  Buscando docentes...
+                </p>
+              )}
+
+              {docenteResultados.length > 0 && (
+                <div className="absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                  {docenteResultados.map((docente) => (
+                    <button
+                      key={docente.id}
+                      type="button"
+                      onClick={() => seleccionarDocente(docente)}
+                      className="block w-full border-b border-slate-100 px-4 py-3 text-left text-sm hover:bg-blue-50"
+                    >
+                      <span className="block font-bold text-slate-800">
+                        {docente.nombre_completo}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-500">
+                        {docente.especialidad || "Sin especialidad"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {form.docente_id && (
+                <p className="mt-2 text-xs font-bold text-green-700">
+                  Docente seleccionado correctamente.
+                </p>
+              )}
             </div>
 
-            <div>
+            <div className="relative">
               <label className="mb-2 block text-sm font-semibold text-slate-700">
                 Aula
               </label>
-              <select
-                name="aula_id"
-                value={form.aula_id}
-                onChange={handleChange}
-                className="h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/20"
-              >
-                <option value="">Seleccione aula</option>
-                {opciones.aulas.map((aula) => (
-                  <option key={aula.id} value={aula.id}>
-                    {aula.codigo} - {aula.tipo_aula} - Capacidad {aula.capacidad}
-                  </option>
-                ))}
-              </select>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={aulaTexto}
+                  onChange={(e) => {
+                    setAulaTexto(e.target.value);
+                    if (form.aula_id) limpiarAula();
+                  }}
+                  placeholder="Escriba código o tipo de aula..."
+                  className="h-12 flex-1 rounded-xl border border-slate-300 px-4 text-sm outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/20"
+                />
+
+                {form.aula_id && (
+                  <button
+                    type="button"
+                    onClick={limpiarAula}
+                    className="h-12 rounded-xl border border-slate-300 px-3 text-sm font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {buscandoAulas && (
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  Buscando aulas...
+                </p>
+              )}
+
+              {aulaResultados.length > 0 && (
+                <div className="absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                  {aulaResultados.map((aula) => (
+                    <button
+                      key={aula.id}
+                      type="button"
+                      onClick={() => seleccionarAula(aula)}
+                      className="block w-full border-b border-slate-100 px-4 py-3 text-left text-sm hover:bg-blue-50"
+                    >
+                      <span className="block font-bold text-slate-800">
+                        {aula.codigo}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-500">
+                        {aula.tipo_aula} · Capacidad {aula.capacidad} ·{" "}
+                        {aula.ubicacion || "Sin ubicación"}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {aulaSeleccionada && (
                 <p className="mt-2 text-xs font-semibold text-slate-500">
@@ -324,9 +639,7 @@ export default function SeccionesNrcAdmin() {
 
             <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
               Semestre automático:{" "}
-              <span className="font-bold">
-                {opciones.semestre?.codigo || "No definido"}
-              </span>
+              <span className="font-bold">{semestre?.codigo || "No definido"}</span>
               . El cupo se calcula con la capacidad del aula.
             </div>
 

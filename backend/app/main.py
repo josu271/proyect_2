@@ -14,7 +14,8 @@ from app.modules.estudiante.matricula.matricula_routes import router as estudian
 from app.modules.estudiante.mi_horario.mi_horario_routes import router as mi_horario_estudiante_router
 from app.modules.estudiante.historial_academico.historial_academico_routes import router as historial_academico_router
 from app.modules.estudiante.mis_cursos.mis_cursos_routes import router as mis_cursos_estudiante_router
-
+from app.middleware.environmental_metrics import EnvironmentalMetricsMiddleware
+from app.modules.environmental.environmental_routes import router as environmental_router
 app = FastAPI(title="Sistema de Horarios Académicos")
 
 origins = [
@@ -43,6 +44,8 @@ app.include_router(estudiante_matricula_router)
 app.include_router(mi_horario_estudiante_router)
 app.include_router(historial_academico_router)
 app.include_router(mis_cursos_estudiante_router)
+app.include_router(environmental_router)
+app.add_middleware(EnvironmentalMetricsMiddleware)
 
 @app.get("/")
 def root():
