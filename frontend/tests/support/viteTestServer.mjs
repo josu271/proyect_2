@@ -10,6 +10,9 @@ export function registerViteServer() {
       root: process.cwd(),
       logLevel: "error",
       appType: "custom",
+      optimizeDeps: {
+        noDiscovery: true,
+      },
       server: {
         middlewareMode: true,
       },
