@@ -86,14 +86,20 @@ export default function LoginPage() {
 
               <div>
 
-                <label className="mb-2 block text-sm font-bold text-slate-800">
+                <label
+                  htmlFor="correo"
+                  className="mb-2 block text-sm font-bold text-slate-800"
+                >
                   Correo electrónico
                 </label>
 
                 <input
+                  id="correo"
+                  name="correo"
                   type="email"
                   value={correo}
                   onChange={(e) => setCorreo(e.target.value)}
+                  autoComplete="email"
                   className="h-14 w-full rounded-md border border-slate-300 bg-white px-5"
                 />
 
@@ -101,14 +107,20 @@ export default function LoginPage() {
 
               <div>
 
-                <label className="mb-2 block text-sm font-bold text-slate-800">
+                <label
+                  htmlFor="contrasena"
+                  className="mb-2 block text-sm font-bold text-slate-800"
+                >
                   Contraseña
                 </label>
 
                 <input
+                  id="contrasena"
+                  name="contrasena"
                   type="password"
                   value={contrasena}
                   onChange={(e) => setContrasena(e.target.value)}
+                  autoComplete="current-password"
                   className="h-14 w-full rounded-md border border-slate-300 bg-white px-5"
                 />
 

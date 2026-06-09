@@ -63,7 +63,7 @@ export default function RecoverPasswordPage() {
             {/* VOLVER */}
             <div className="mt-5 text-center">
               <Link
-                to="/"
+                to="/login"
                 className="text-base font-bold text-slate-950 hover:text-blue-800"
               >
                 Volver al inicio de sesión
