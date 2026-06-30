@@ -2,23 +2,37 @@
 
 ## 📌 Tabla de Contenidos (TOC)
 
-1. [Descripción del Proyecto](#-descripción-del-proyecto)
-2. [Contexto del Problema](#-contexto-del-problema)
-3. [Objetivos del Proyecto](#-objetivos-del-proyecto)
-4. [Análisis del Negocio Académico](#-análisis-del-negocio-académico)
-5. [Stakeholders Involucrados](#-stakeholders-involucrados)
-6. [Indicadores Clave de Éxito (KPIs)](#-indicadores-clave-de-éxito-kpis)
-7. [Funcionalidades Principales](#-funcionalidades-principales)
-8. [Arquitectura del Sistema](#-arquitectura-del-sistema)
-9. [Estructura del Proyecto](#-estructura-del-proyecto)
-10. [Tecnologías Utilizadas](#-tecnologías-utilizadas)
-11. [Instalación y Puesta en Marcha](#-instalación-y-puesta-en-marcha)
-12. [Variables de Entorno](#-variables-de-entorno)
-13. [Ejecución de Pruebas](#-ejecución-de-pruebas)
-14. [Estándares y Buenas Prácticas Aplicadas](#-estándares-y-buenas-prácticas-aplicadas)
-15. [Metodología de Desarrollo](#-metodología-de-desarrollo)
-16. [Equipo de Desarrollo](#-equipo-de-desarrollo)
+1. [Equipo de Desarrollo](#-equipo-de-desarrollo)
+2. [Descripción del Proyecto](#-descripción-del-proyecto)
+3. [Contexto del Problema](#-contexto-del-problema)
+4. [Objetivos del Proyecto](#-objetivos-del-proyecto)
+5. [Análisis del Negocio Académico](#-análisis-del-negocio-académico)
+6. [Stakeholders Involucrados](#-stakeholders-involucrados)
+7. [Indicadores Clave de Éxito (KPIs)](#-indicadores-clave-de-éxito-kpis)
+8. [Funcionalidades Principales](#-funcionalidades-principales)
+9. [Arquitectura del Sistema](#-arquitectura-del-sistema)
+10. [Estructura del Proyecto](#-estructura-del-proyecto)
+11. [Tecnologías Utilizadas](#-tecnologías-utilizadas)
+12. [Instalación y Puesta en Marcha](#-instalación-y-puesta-en-marcha)
+13. [Variables de Entorno](#-variables-de-entorno)
+14. [Ejecución de Pruebas](#-ejecución-de-pruebas)
+15. [Estándares y Buenas Prácticas Aplicadas](#-estándares-y-buenas-prácticas-aplicadas)
+16. [Metodología de Desarrollo](#-metodología-de-desarrollo)
 17. [Licencia](#-licencia)
+
+---
+
+## 👥 Equipo de Desarrollo
+
+| Nombre | Rol |
+| :--- | :--- |
+| Sulla Corbetta Jose Luis | Backend Developer |
+| Reyes Mendoza Harol Jesus | Frontend Developer |
+| Rafael Carpio Fabrizio Alezander | QA / Documentación |
+| Vilcahuaman Gonzales Jordan Ricardo | Especialista en Datos |
+
+<img width="1280" height="959" alt="Integrantes del Equipo" src="https://github.com/user-attachments/assets/e33377c7-c85e-46d4-abfd-aaafa207e733" />
+
 ---
 
 ## 🧠 Descripción del Proyecto
@@ -345,17 +359,6 @@ El proyecto utiliza:
 - **TDD** — Ciclo Red → Green → Refactor
 - **Conventional Commits** — Mensajes de commit estandarizados (`feat:`, `fix:`, `docs:`, etc.)
 - **Desarrollo incremental** basado en MVP
-
----
-
-## 👥 Equipo de Desarrollo
-
-| Nombre | Rol |
-| :--- | :--- |
-| Sulla Corbetta Jose Luis | Backend Developer |
-| Reyes Mendoza Harol Jesus | Frontend Developer |
-| Rafael Carpio Fabrizio Alezander | QA / Documentación |
-| Vilcahuaman Gonzales Jordan Ricardo | Especialista en Datos |
 
 ---
 
